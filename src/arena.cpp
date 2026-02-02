@@ -1,17 +1,17 @@
 #include "../includes/arena.h"
 
-void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat raio,
+void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
                          GLfloat R, GLfloat G, GLfloat B)
 {
     glPushMatrix();
-    glTranslatef(x, y, 0.0f);
+    glTranslatef(x, y, z);
 
     DesenhaCirc(raio, R, G, B, DETALHE_ARENA);
 
     for (auto& obst : this->obstaculos)
     {
         glPushMatrix();
-        glTranslatef(obst.x, obst.y, 0.0f);
+        glTranslatef(obst.x, obst.y, obst.z);
         DesenhaCirc(obst.raio, 0.0f, 0.0f, 0.0f, DETALHE_OBSTACULO);
         glPopMatrix();
     }
@@ -27,6 +27,11 @@ GLfloat Arena::X()
 GLfloat Arena::Y()
 {
     return this->gY;
+}
+
+GLfloat Arena::Z()
+{
+    return this->gZ;
 }
 
 GLfloat Arena::Raio()

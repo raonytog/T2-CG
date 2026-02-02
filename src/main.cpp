@@ -17,6 +17,7 @@ using namespace tinyxml2;
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #define V_JOGADOR (GLfloat) 0.1
 #define OMEGA_JOGADOR (GLfloat) .1
@@ -35,12 +36,15 @@ GLfloat mouse_x = 0.0f;
 GLfloat mouse_Y = 0.0f;
 
 // Window dimensions
-const GLint width = 500;
+const GLint width = 800;
 const GLint height = 500;
 
 // Viewing dimensions
-const GLint viewing_width = 500;
+const GLint viewing_width = 400;
 const GLint viewing_height = 500;
+
+const GLint fov = 60;
+const GLint aspect_ratio = viewing_width / viewing_height;
 
 // Objetos
 Arena *arena = nullptr;
@@ -175,26 +179,94 @@ void DesenhaCoracoes(int vidas_1, int vidas_2)
     }
 }
 
+// Coloca a câmera atrás do jogador e olhando para ele
+void PosicionaCamera(Jogador* p) {
+    // Pegamos a posição e o ângulo do jogador
+    float x = p->X();
+    float y = p->Y();
+    // Assumindo que o ângulo no seu Jogador está em graus e precisa converter para radianos
+    // Se já tiver getter para radianos, use-o.
+    // O deslocamento -50 coloca a câmera "atrás" (ajuste conforme a escala do seu mundo)
+    float dist_camera = 50.0f; 
+    float altura_camera = 30.0f;
+    float theta_rad = p->Theta() * M_PI / 180.0f; 
+
+    // Posição do Olho (Câmera)
+    // Calcula x/y atrás do jogador baseado no ângulo
+    float cam_x = x - dist_camera * cos(theta_rad);
+    float cam_y = y - dist_camera * sin(theta_rad);
+    float cam_z = altura_camera; // Altura da câmera (Z é up)
+
+    // Ponto para onde a câmera olha (Centro do Jogador)
+    float look_x = x;
+    float look_y = y;
+    float look_z = 0.0f; // Olha para o chão/centro do boneco
+
+    // Vetor Up (Onde fica o "céu")
+    // Como estamos em um mundo 2D virando 3D, geralmente Z é o Up
+    gluLookAt(cam_x, cam_y, cam_z,  // Eye
+              look_x, look_y, look_z,  // Center
+              0.0f, 0.0f, 1.0f);       // Up
+}
+
+void DrawAxes(double size) {
+    GLfloat mat_ambient_r[] = { 1.0, 0.0, 0.0, 1.0 };
+    GLfloat mat_ambient_g[] = { 0.0, 1.0, 0.0, 1.0 };
+    GLfloat mat_ambient_b[] = { 0.0, 0.0, 1.0, 1.0 };
+    GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
+
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, no_mat);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, no_mat);
+    glMaterialfv(GL_FRONT, GL_SHININESS, no_mat);
+
+    //x axis red
+    glPushMatrix();
+        glMaterialfv(GL_FRONT, GL_EMISSION, mat_ambient_r);
+        glColor3fv(mat_ambient_r);
+        glScalef(size, size*0.1, size*0.1);
+        glTranslatef(0.5, 0, 0); // put in one end
+        glutSolidCube(1.0);
+    glPopMatrix();
+
+    //y axis green
+    glPushMatrix();
+        glMaterialfv(GL_FRONT, GL_EMISSION,  mat_ambient_g);
+        glColor3fv(mat_ambient_g);
+        glRotatef(90,0,0,1);
+        glScalef(size, size*0.1, size*0.1);
+        glTranslatef(0.5, 0, 0); // put in one end
+        glutSolidCube(1.0);
+    glPopMatrix();
+
+    //z axis blue
+    glPushMatrix();
+        glMaterialfv(GL_FRONT, GL_EMISSION, mat_ambient_b);
+        glColor3fv(mat_ambient_b);
+        glRotatef(-90,0,1,0);
+        glScalef(size, size*0.1, size*0.1);
+        glTranslatef(0.5, 0, 0); // put in one end
+        glutSolidCube(1.0);
+    glPopMatrix();
+}
+
 void renderScene(void)
 {
-    // limpa a tela
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // arena->Desenha();
+    // p1
+    glViewport(0, 0, 400, 500);
+    glLoadIdentity();
+    gluLookAt(0, 0, 1,
+              0, 0, 0,
+              0, 1, 0);
 
-    // j_1->DesenhaParteInferior();
-    // j_2->DesenhaParteInferior();
+    DrawAxes(5);
 
-    // for (auto& tiro : tiros) { tiro.Desenha(); }
-
-    // j_1->DesenhaParteSuperior();
-    // j_2->DesenhaParteSuperior();
-
-    // DesenhaCoracoes(j_1->Vidas(), j_2->Vidas());
-
-    // if (estado > 0) MensagemDeVitoria(0, 0);
     
-    // desenha o novo frame do jogo
+
+
+    if (estado > 0) MensagemDeVitoria(0, 0);
+    
     glutSwapBuffers();
 }
 
@@ -238,7 +310,7 @@ void reset()
     GLfloat theta_2 = normalizaAnguloGraus(theta_1 + 180.0f);
 
     delete arena;
-    arena = new Arena(0.0f, 0.0f, std::min(viewing_width, viewing_height) / 2.0f, 0.0f, 0.0f, 1.0f);
+    arena = new Arena(0.0f, 0.0f, 0.0f, std::min(viewing_width, viewing_height) / 2.0f, 0.0f, 0.0f, 1.0f);
 
     tiros.clear();
 
@@ -533,12 +605,10 @@ void init()
     glEnable(GL_DEPTH_TEST);
  
     glMatrixMode(GL_PROJECTION);
-    glOrtho(-(viewing_width/2),  // coordenada X do canto esquerdo
-            (viewing_width/2),   // coordenada X do canto direito
-            -(viewing_height/2), // coordenada Y do canto inferior
-            (viewing_height/2),  // coordenada Y do canto superior
-            -100,                // coordenada Z do plano próximo
-            100);                // coordenada Z do plano distante
+    glLoadIdentity();
+
+    gluPerspective(fov, aspect_ratio, 1, 15);
+
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
@@ -600,7 +670,7 @@ void inicializaObjetos()
     GLfloat theta_1 = normalizaAnguloGraus(atan2(y_2 - y_1, x_2 - x_1) * 180.0 / PI);
     GLfloat theta_2 = normalizaAnguloGraus(theta_1 + 180.0f);
 
-    arena = new Arena(0.0f, 0.0f, std::min(viewing_width, viewing_height) / 2.0f, 0.0f, 0.0f, 1.0f);
+    arena = new Arena(0.0f, 0.0f, 0.0f, std::min(viewing_width, viewing_height) / 2.0f, 0.0f, 0.0f, 1.0f);
     j_1 = new Jogador(x_1, y_1, r_1, 1.0f, 0.0f, 0.0f, theta_1, 3);
     j_2 = new Jogador(x_2, y_2, r_2, 0.0f, 1.0f, 0.0f, theta_2, 3);
 
@@ -629,7 +699,7 @@ int main(int argc, char *argv[])
 
     // inicializa openGL
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GL_DEPTH);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
  
     // cria a janela
     glutInitWindowSize(width, height);

@@ -19,28 +19,27 @@ struct Obstaculo
 {
     float x;
     float y;
+    float z;
     float raio;
 };
 
 class Arena {
-    GLfloat gX; 
-    GLfloat gY;
+    GLfloat gX, gY, gZ; 
+    GLfloat R, G, B;
     GLfloat raio;
-    GLfloat R;
-    GLfloat G;
-    GLfloat B;
     std::vector<Obstaculo> obstaculos;
 private:
-    void DesenhaArena(GLfloat x, GLfloat y, GLfloat raio,
+    void DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
                       GLfloat R, GLfloat G, GLfloat B);
 
 public:
     friend class Jogador;
 
-    Arena(GLfloat x, GLfloat y, GLfloat raio, GLfloat R, GLfloat G, GLfloat B)
+    Arena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio, GLfloat R, GLfloat G, GLfloat B)
     {
         this->gX = x; 
         this->gY = y;
+        this->gZ = z;
         this->raio = raio;
         this->R = R;
         this->G = G;
@@ -48,7 +47,7 @@ public:
     };
     void Desenha()
     { 
-        DesenhaArena(gX, gY, raio, R, G, B);
+        DesenhaArena(gX, gY, gZ, raio, R, G, B);
     };
 
     void adicionaObstaculo(float x, float y, float r)
@@ -58,6 +57,7 @@ public:
 
     GLfloat X();
     GLfloat Y();
+    GLfloat Z();
     GLfloat Raio();
 
     void colisaoJogador(Jogador *j_1, Jogador *j_2);

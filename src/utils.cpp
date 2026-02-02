@@ -1,4 +1,5 @@
 #include "../includes/utils.h"
+#include <algorithm>
 
 float normalizaAnguloGraus(float angulo)
 {
@@ -85,7 +86,7 @@ void DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B, int detalhe)
 
     glBegin(GL_TRIANGLE_FAN);
     for (int i = 0; i < detalhe; i++) {
-        glVertex2f(radius * cos(i * PI * 2 / detalhe), radius * sin(i * PI * 2 / detalhe));
+        glVertex3f(radius * cos(i * PI * 2 / detalhe), radius * sin(i * PI * 2 / detalhe), 0.0f);
     }
     glEnd();
 }
