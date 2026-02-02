@@ -1,0 +1,67 @@
+#ifndef ARENA_H
+#define	ARENA_H
+
+#include "jogador.h"
+#include "tiro.h"
+#include "utils.h"
+
+#include <GL/gl.h>
+#include <GL/glu.h>
+
+#include <math.h>
+#include <string.h>
+#include <vector>
+
+#define DETALHE_ARENA 120
+#define DETALHE_OBSTACULO 36
+
+struct Obstaculo
+{
+    float x;
+    float y;
+    float raio;
+};
+
+class Arena {
+    GLfloat gX; 
+    GLfloat gY;
+    GLfloat raio;
+    GLfloat R;
+    GLfloat G;
+    GLfloat B;
+    std::vector<Obstaculo> obstaculos;
+private:
+    void DesenhaArena(GLfloat x, GLfloat y, GLfloat raio,
+                      GLfloat R, GLfloat G, GLfloat B);
+
+public:
+    friend class Jogador;
+
+    Arena(GLfloat x, GLfloat y, GLfloat raio, GLfloat R, GLfloat G, GLfloat B)
+    {
+        this->gX = x; 
+        this->gY = y;
+        this->raio = raio;
+        this->R = R;
+        this->G = G;
+        this->B = B;
+    };
+    void Desenha()
+    { 
+        DesenhaArena(gX, gY, raio, R, G, B);
+    };
+
+    void adicionaObstaculo(float x, float y, float r)
+    {
+        this->obstaculos.emplace_back(Obstaculo{x, y, r});
+    }
+
+    GLfloat X();
+    GLfloat Y();
+    GLfloat Raio();
+
+    void colisaoJogador(Jogador *j_1, Jogador *j_2);
+    void colisaoTiro(std::vector<Tiro>& tiros);
+};
+
+#endif /* ARENA_H */

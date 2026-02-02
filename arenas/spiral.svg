@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <circle
+     cx="0"
+     cy="0"
+     r="5"
+     fill="blue"
+     id="1" />
+  <circle
+     cx="-4"
+     cy="0"
+     r=".5"
+     fill="red"
+     id="5" />
+  <circle
+     cx="4"
+     cy="0"
+     r=".5"
+     fill="green"
+     id="6" />
+  <circle
+     cx="0"
+     cy="0"
+     r=".4"
+     fill="black"
+     id="7" />
+  <circle
+     cx="0.560003"
+     cy="0.695163"
+     r=".4"
+     fill="black"
+     id="8" />
+  <circle
+     cx="0.065590"
+     cy="1.526445"
+     r=".4"
+     fill="black"
+     id="9" />
+  <circle
+     cx="-0.874396"
+     cy="1.819571"
+     r=".4"
+     fill="black"
+     id="10" />
+  <circle
+     cx="-1.837497"
+     cy="1.588303"
+     r=".4"
+     fill="black"
+     id="11" />
+  <circle
+     cx="-2.613267"
+     cy="0.968084"
+     r=".4"
+     fill="black"
+     id="12" />
+  <circle
+     cx="-3.106346"
+     cy="0.104109"
+     r=".4"
+     fill="black"
+     id="13" />
+  <circle
+     cx="-3.287281"
+     cy="-0.875083"
+     r=".4"
+     fill="black"
+     id="14" />
+  <circle
+     cx="-3.165710"
+     cy="-1.864088"
+     r=".4"
+     fill="black"
+     id="15" />
+  <circle
+     cx="-2.774311"
+     cy="-2.780989"
+     r=".4"
+     fill="black"
+     id="16" />
+  <circle
+     cx="-2.158553"
+     cy="-3.565525"
+     r=".4"
+     fill="black"
+     id="17" />
+  <circle
+     cx="-1.369920"
+     cy="-4.176508"
+     r=".4"
+     fill="black"
+     id="18" />
+  <circle
+     cx="-0.461342"
+     cy="-4.589063"
+     r=".4"
+     fill="black"
+     id="19" />
+  <circle
+     cx="0.515871"
+     cy="-4.791942"
+     r=".4"
+     fill="black"
+     id="20" />
+  <circle
+     cx="1.514061"
+     cy="-4.785014"
+     r=".4"
+     fill="black"
+     id="21" />
+  <circle
+     cx="2.490502"
+     cy="-4.577005"
+     r=".4"
+     fill="black"
+     id="21" />
+</svg>

@@ -1,0 +1,660 @@
+#include "../includes/arena.h"
+#include "../includes/jogador.h"
+#include "../includes/tiro.h"
+#include "../includes/utils.h"
+
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+
+#include "../includes/tinyxml2.h"
+using namespace tinyxml2;
+
+#include <algorithm>
+#include <math.h>
+#include <stdexcept>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <vector>
+
+#define V_JOGADOR (GLfloat) 0.1
+#define OMEGA_JOGADOR (GLfloat) .1
+#define OMEGA_BRACO (GLfloat).1
+#define V_TIRO (GLfloat) 0.2
+
+#define DETALHE_CORACAO 18
+#define TAMANHO_CORACAO (GLfloat) 24
+#define DISTANCIA_CORACAO (GLfloat) 8 // distância entre um coração e outro e distância da borda
+
+//Key status
+int key_status[256];
+
+// MousePos
+GLfloat mouse_x = 0.0f;
+GLfloat mouse_Y = 0.0f;
+
+// Window dimensions
+const GLint width = 500;
+const GLint height = 500;
+
+// Viewing dimensions
+const GLint viewing_width = 500;
+const GLint viewing_height = 500;
+
+// Objetos
+Arena *arena = nullptr;
+
+Jogador *j_1 = nullptr;
+Jogador *j_2 = nullptr;
+
+std::vector<Tiro> tiros;
+
+int estado = 0;
+// -1 para quit
+// 0 se o jogo ainda está ocorrendo,
+// 1 se o jogador 1 ganhou,
+// 2 se o jogador 2 ganhou,
+// 3 se foi empate
+
+// Mensagem de vitória
+static char str[32];
+void * font = GLUT_BITMAP_HELVETICA_18;
+void MensagemDeVitoria(GLfloat x, GLfloat y)
+{
+    glColor3f(1.0, 1.0, 1.0);
+
+    // cria a string a ser impressa
+    char *tmp_str;
+    if (estado == 3)
+        sprintf(str, "Os jogadores empataram");
+    else
+        sprintf(str, "O jogador %d venceu", estado);
+
+    // define a posicao onde vai comecar a imprimir
+    float x_offset = glutBitmapLength(font, (const unsigned char *)str) / 2.0f;
+    float y_offset = 9.0f; // pois a fonte é tamanho 18
+
+    glRasterPos2f(x - x_offset, y - y_offset);
+
+    // imprime um caractere por vez
+    tmp_str = str;
+    while(*tmp_str)
+    {
+        glutBitmapCharacter(font, *tmp_str);
+        tmp_str++;
+    }
+}
+
+struct Circulo
+{
+    float x;
+    float y;
+    float raio;
+    std::string cor;
+};
+
+// dados do SVG
+// inicialmente de acordo com os valores no SVG
+// mas são ajustados na primeira chamada da main
+// para serem convertidos às dimensões do jogo
+std::vector<Circulo> circulos;
+
+std::vector<Circulo> LeSVG(const std::string& nome_arquivo) {
+    std::vector<Circulo> ret;
+
+    XMLDocument doc;
+    XMLError erro = doc.LoadFile(nome_arquivo.c_str());
+    if (erro != XML_SUCCESS)
+    {
+        fprintf(stderr, "erro ao carregar o arquivo SVG: %d\n", erro);
+        return ret;
+    }
+
+    XMLElement* p_root = doc.FirstChildElement("svg");
+    if (p_root == nullptr)
+    {
+        fprintf(stderr, "erro: Arquivo SVG não contém a tag raiz <svg>.\n");
+        return ret;
+    }
+    
+    XMLElement* p_elemento = p_root->FirstChildElement();
+
+    while (p_elemento != nullptr)
+    {
+        // lê o arquivo SGV até retornar todos os círculos
+        const char* tag_nome = p_elemento->Name();
+
+        if (std::strcmp(tag_nome, "circle") == 0)
+        {
+            Circulo circulo;
+            
+            p_elemento->QueryFloatAttribute("cx", &circulo.x);
+            p_elemento->QueryFloatAttribute("cy", &circulo.y);
+            p_elemento->QueryFloatAttribute("r", &circulo.raio);
+            
+            const char* fill = p_elemento->Attribute("fill");
+            if (fill)
+                circulo.cor = fill;
+            else
+                circulo.cor = "none";
+            ret.push_back(circulo);
+        }
+        p_elemento = p_elemento->NextSiblingElement();
+    }
+    
+    return ret;
+}
+
+void DesenhaCoracoes(int vidas_1, int vidas_2)
+{
+    // desenha corações do jogador 1 da esquerda pra direita
+    GLfloat x_atual = -viewing_width / 2.0f + DISTANCIA_CORACAO + TAMANHO_CORACAO / 2.0f;
+    GLfloat y_atual = viewing_height / 2.0f - DISTANCIA_CORACAO - TAMANHO_CORACAO / 2.0f;
+
+    for (int i = 0; i < vidas_1; i++)
+    {
+        glPushMatrix();
+        glTranslatef(x_atual, y_atual, 0.0f);
+        DesenhaCoracao(TAMANHO_CORACAO, TAMANHO_CORACAO, 1.0f, 0.0f, 0.0f, DETALHE_CORACAO);
+        glPopMatrix();
+
+        x_atual += DISTANCIA_CORACAO + TAMANHO_CORACAO;
+    }
+
+    // desenha corações do jogador 2 da direita pra esquerda
+    x_atual = viewing_width / 2.0f - DISTANCIA_CORACAO - TAMANHO_CORACAO / 2.0f;
+    for (int i = 0; i < vidas_2; i++)
+    {
+        glPushMatrix();
+        glTranslatef(x_atual, y_atual, 0.0f);
+        DesenhaCoracao(TAMANHO_CORACAO, TAMANHO_CORACAO, 0.0f, 1.0f, 0.0f, DETALHE_CORACAO);
+        glPopMatrix();
+
+        x_atual -= DISTANCIA_CORACAO + TAMANHO_CORACAO;
+    }
+}
+
+void renderScene(void)
+{
+    // limpa a tela
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    arena->Desenha();
+
+    j_1->DesenhaParteInferior();
+    j_2->DesenhaParteInferior();
+
+    for (auto& tiro : tiros)
+    {
+        tiro.Desenha();
+    }
+
+    j_1->DesenhaParteSuperior();
+    j_2->DesenhaParteSuperior();
+
+    DesenhaCoracoes(j_1->Vidas(), j_2->Vidas());
+
+    if (estado > 0)
+        MensagemDeVitoria(0, 0);
+    
+    // desenha o novo frame do jogo
+    glutSwapBuffers();
+}
+
+void resetKeyStatus()
+{
+    int i;
+    for (i = 0; i < 256; i++)
+       key_status[i] = 0; 
+}
+
+void reset()
+{
+    // procura os valores iniciais dos jogadores
+    float x_1 = 0.0f;
+    float y_1 = 0.0f;
+    float r_1 = 0.0f;
+    float x_2 = 0.0f;
+    float y_2 = 0.0f;
+    float r_2 = 0.0f;
+
+    for (auto& c : circulos) {
+        if (c.cor == "red")
+        {
+            x_1 = c.x;
+            y_1 = c.y;
+            r_1 = c.raio;
+        }
+        if (c.cor == "green")
+        {
+            x_2 = c.x;
+            y_2 = c.y;
+            r_2 = c.raio;
+        }
+
+        if (r_1 > 0 && r_2 > 0)
+            break;
+    }
+
+    // ângulo inicial dos jogadores
+    GLfloat theta_1 = normalizaAnguloGraus(atan2(y_2 - y_1, x_2 - x_1) * 180.0f / PI);
+    GLfloat theta_2 = normalizaAnguloGraus(theta_1 + 180.0f);
+
+    delete arena;
+    arena = new Arena(0.0f, 0.0f, std::min(viewing_width, viewing_height) / 2.0f, 0.0f, 0.0f, 1.0f);
+
+    tiros.clear();
+
+    delete j_1;
+    delete j_2;
+    j_1 = new Jogador(x_1, y_1, r_1, 1.0f, 0.0f, 0.0f, theta_1, 3);
+    j_2 = new Jogador(x_2, y_2, r_2, 0.0f, 1.0f, 0.0f, theta_2, 3);
+
+    for (auto& c : circulos) {
+        if (c.cor == "black")
+        {
+            arena->adicionaObstaculo(c.x, c.y, c.raio);
+        }
+    }
+
+    // inicia o jogo com o jogador 1 (controlado pelo mouse) com o braço em direção
+    // ao jogador 2
+    mouse_x = j_2->X();
+    mouse_Y = j_2->Y();
+
+    resetKeyStatus();
+    key_status[(int) 'r'] = 1; // mantém o status de r como apertado
+                               // para evitar vários resets sequenciais
+}
+
+void quit()
+{
+    delete arena;
+    delete j_1;
+    delete j_2;
+}
+
+void keyPress(unsigned char key, int x, int y)
+{
+    switch (key)
+    {
+        case 'r':
+        case 'R':
+            if (key_status[(int) 'r'] == 0) // confere se não estava pressionado antes
+            {                               // para evitar vários resets sequenciais
+                reset();
+                estado = 0;
+            }
+            break;
+        case 'w':
+        case 'W':
+            key_status[(int) 'w'] = 1;
+            break;
+        case 's':
+        case 'S':
+            key_status[(int) 's'] = 1;
+            break;
+        case 'o':
+        case 'O':
+            key_status[(int) 'o'] = 1;
+            break;
+        case 'l':
+        case 'L':
+            key_status[(int) 'l'] = 1;
+            break;
+        case 'a':
+        case 'A':
+            key_status[(int) 'a'] = 1;
+            break;
+        case 'd':
+        case 'D':
+            key_status[(int) 'd'] = 1;
+            break;
+        case 'k':
+        case 'K':
+            key_status[(int) 'k'] = 1;
+            break;
+        case 231: // ç
+        case 199: // Ç
+        case ';': // equivalente ao ç no meu wsl
+                  // que não sabe que eu tenho um teclado brasileiro
+            key_status[231] = 1;
+            break;
+        case '4':
+            key_status[(int) '4'] = 1;
+            break;
+        case '6':
+            key_status[(int) '6'] = 1;
+            break;
+        case '5':
+            key_status[(int) '5'] = 1;
+            break;
+        case 27:
+            estado = -1;
+            break;
+    }
+    glutPostRedisplay();
+}
+
+void keyUp(unsigned char key, int x, int y)
+{
+    key_status[(int)(key)] = 0;
+    if (key == ';') // ver keyPress
+    {
+        key_status[231] = 0;
+    }
+    glutPostRedisplay();
+}
+
+void mouseClick(int button, int state, int x, int y) {
+    if (estado == 0 && button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+    {
+        if (j_1->PodeAtirar())
+        {
+            GLfloat tiro_x = j_1->XPontaBraco();
+            GLfloat tiro_y = j_1->YPontaBraco();
+            GLfloat tiro_tamanho = j_1->EspessuraBraco();
+            GLfloat tiro_theta = j_1->ThetaBraco();
+
+            tiros.emplace_back(tiro_x, tiro_y, tiro_tamanho, tiro_theta, 1);
+
+            j_1->ResetaTimer();
+        }
+    }
+}
+
+void mouseMove(int x, int y) {
+    mouse_x = viewing_width * ((float) x / width - 0.5f);
+    mouse_Y = -viewing_height * ((float) y / height - 0.5f);
+}
+
+void idle(void)
+{
+    static GLdouble previous_time = glutGet(GLUT_ELAPSED_TIME);
+    GLdouble current_time, d_t;
+    // pega o tempo que passou do início da aplicação
+    current_time = glutGet(GLUT_ELAPSED_TIME);
+    // calcula o tempo decorrido desde de o última frame
+    d_t = current_time - previous_time;
+    // atualiza o tempo do último frame ocorrido
+    previous_time = current_time;
+
+    if (estado == -1)
+    {
+        quit();
+        exit(0);
+    }
+    else if (estado > 0)
+        return;
+
+    // encontrei um problema ao rodar o código em casa onde a cada minuto,
+    // mais ou menos, o d_t dá um salto enorme (>1000) e faz com que
+    // o jogador tenha um movimento errático, quase se teleportando
+    // não encontrei esse problema no labgrad, então imagino que seja algum problema
+    // específico do wsl. então estou botando essa linha de código aqui
+    // pra evitar esse problema
+    if (d_t > 10.0f)
+        d_t = 10.0f;
+    else if (d_t < 0.0f)
+        d_t = 0.0f;
+
+    // bools que controlam a animação dos jogadores
+    // caso os jogadores estejam se movimentando pra frente, trás ou girando
+    // continua com a animação da perna, caso contrário, "reseta" a animação
+    bool animacao_frente_1 = false;
+    bool animacao_tras_1 = false;
+    bool animacao_frente_2 = false;
+    bool animacao_tras_2 = false;
+
+    if (key_status[(int) 'a'])
+    {
+        if (!key_status[(int) 'd'])
+        {
+            animacao_frente_1 = true;
+            j_1->Roda(OMEGA_JOGADOR, d_t);
+        }
+    }
+    else if (key_status[(int) 'd'])
+    {
+        animacao_frente_1 = true;
+        j_1->Roda(-OMEGA_JOGADOR, d_t);
+    }
+
+    if (key_status[(int) 'k'])
+    {
+        if (!key_status[231])
+        {
+            animacao_frente_2 = true;
+            j_2->Roda(OMEGA_JOGADOR, d_t);
+        }
+    }
+    else if (key_status[231])
+    {
+        animacao_frente_2 = true;
+        j_2->Roda(-OMEGA_JOGADOR, d_t);
+    }
+
+    if (key_status[(int) 'w'])
+    {
+        if (!key_status[(int) 's'])
+        {
+            animacao_frente_1 = true;
+            j_1->Move(V_JOGADOR, d_t);
+        }
+    }
+    else if (key_status[(int) 's'])
+    {
+        animacao_tras_1 = true;
+        j_1->Move(-V_JOGADOR, d_t);
+    }
+
+    if (key_status[(int) 'o'])
+    {
+        if (!key_status[(int) 'l'])
+        {
+            animacao_frente_2 = true;
+            j_2->Move(V_JOGADOR, d_t);
+        }
+    }
+    else if (key_status[(int) 'l'])
+    {
+        animacao_tras_2 = true;
+        j_2->Move(-V_JOGADOR, d_t);
+    }
+
+    if (key_status[(int) '5'])
+    {
+        if (j_2->PodeAtirar())
+        {
+            GLfloat tiro_x = j_2->XPontaBraco();
+            GLfloat tiro_y = j_2->YPontaBraco();
+            GLfloat tiro_tamanho = j_2->EspessuraBraco();
+            GLfloat tiro_theta = j_2->ThetaBraco();
+
+            tiros.emplace_back(tiro_x, tiro_y, tiro_tamanho, tiro_theta, 2);
+
+            j_2->ResetaTimer();
+        }
+    }
+
+    for (auto& tiro : tiros)
+    {
+        tiro.Move(V_TIRO, d_t);
+    }
+
+    GLfloat theta_mouse = atan2(mouse_Y - j_1->YBaseBraco(), mouse_x - j_1->XBaseBraco()) * 180.0 / PI;
+    j_1->RodaBracoMouse(OMEGA_BRACO, theta_mouse, d_t);
+
+    if (key_status[(int) '4'])
+    {
+        if (!key_status[(int) '6'])
+            j_2->RodaBraco(OMEGA_BRACO, d_t);
+    }
+    else if (key_status[(int) '6'])
+        j_2->RodaBraco(-OMEGA_BRACO, d_t);
+
+    if (animacao_tras_1)
+        j_1->Animacao(-V_JOGADOR, d_t);
+    else if (animacao_frente_1)
+        j_1->Animacao(V_JOGADOR, d_t);
+    else
+        j_1->AnimacaoReset(V_JOGADOR, d_t);
+    
+    if (animacao_tras_2)
+        j_2->Animacao(-V_JOGADOR, d_t);
+    else if (animacao_frente_2)
+        j_2->Animacao(V_JOGADOR, d_t);
+    else
+        j_2->AnimacaoReset(V_JOGADOR, d_t);
+
+    j_1->DecrementaTimer(d_t);
+    j_2->DecrementaTimer(d_t);
+
+    arena->colisaoJogador(j_1, j_2);
+
+    arena->colisaoTiro(tiros);
+
+    int vidas_1 = j_1->colisaoTiro(tiros, 1);
+    int vidas_2 = j_2->colisaoTiro(tiros, 2);
+
+    if (vidas_1 == 0)
+    {
+        if (vidas_2 == 0)
+            estado = 3;
+        else
+            estado = 2;
+    } else if (vidas_2 == 0)
+        estado = 1;
+    
+    glutPostRedisplay();
+}
+
+void init()
+{
+    resetKeyStatus();
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // fundo preto
+ 
+    glMatrixMode(GL_PROJECTION);
+    glOrtho(-(viewing_width/2),  // coordenada X do canto esquerdo
+            (viewing_width/2),   // coordenada X do canto direito
+            -(viewing_height/2), // coordenada Y do canto inferior
+            (viewing_height/2),  // coordenada Y do canto superior
+            -100,                // coordenada Z do plano próximo
+            100);                // coordenada Z do plano distante
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+
+// inicializa arena e jogadores
+void inicializaObjetos()
+{
+    float arena_x = 0.0f;
+    float arena_y = 0.0f;
+    float arena_r = 0.0f;
+
+    // procura o círculo da arena
+    for (auto& c : circulos) {
+        if (c.cor == "blue")
+        {
+            arena_x = c.x;
+            arena_y = c.y;
+            arena_r = c.raio;
+            break;
+        }
+    }
+
+    // modifica os valores dos círculos para centralizar a arena
+    for (auto& c : circulos) {
+        c.x -= arena_x;
+        c.x *= std::min(viewing_height, viewing_width) / (2 * arena_r);
+        c.y -= arena_y;
+        c.y *= std::min(viewing_height, viewing_width) / (2 * arena_r);
+        c.raio *= std::min(viewing_height, viewing_width) / (2 * arena_r);
+    }
+
+    // procura os valores iniciais dos jogadores
+    float x_1 = 0.0f;
+    float y_1 = 0.0f;
+    float r_1 = 0.0f;
+    float x_2 = 0.0f;
+    float y_2 = 0.0f;
+    float r_2 = 0.0f;
+
+    for (auto& c : circulos) {
+        if (c.cor == "red")
+        {
+            x_1 = c.x;
+            y_1 = c.y;
+            r_1 = c.raio;
+        }
+        if (c.cor == "green")
+        {
+            x_2 = c.x;
+            y_2 = c.y;
+            r_2 = c.raio;
+        }
+
+        if (r_1 > 0 && r_2 > 0)
+            break;
+    }
+
+    // ângulo inicial dos jogadores
+    GLfloat theta_1 = normalizaAnguloGraus(atan2(y_2 - y_1, x_2 - x_1) * 180.0 / PI);
+    GLfloat theta_2 = normalizaAnguloGraus(theta_1 + 180.0f);
+
+    arena = new Arena(0.0f, 0.0f, std::min(viewing_width, viewing_height) / 2.0f, 0.0f, 0.0f, 1.0f);
+    j_1 = new Jogador(x_1, y_1, r_1, 1.0f, 0.0f, 0.0f, theta_1, 3);
+    j_2 = new Jogador(x_2, y_2, r_2, 0.0f, 1.0f, 0.0f, theta_2, 3);
+
+    for (auto& c : circulos) {
+        if (c.cor == "black")
+        {
+            arena->adicionaObstaculo(c.x, c.y, c.raio);
+        }
+    }
+
+    // inicia o jogo com o jogador 1 (controlado pelo mouse)
+    // com o braço em direção ao jogador 2
+    mouse_x = j_2->X();
+    mouse_Y = j_2->Y();
+}
+ 
+int main(int argc, char *argv[])
+{
+    if (argc != 2)
+    {
+        printf("erro: passe somente um arquivo.svg como argumento\n");
+        return 1;
+    }
+
+    circulos = LeSVG(argv[1]);
+
+    // inicializa openGL
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+ 
+    // cria a janela
+    glutInitWindowSize(width, height);
+    glutInitWindowPosition(150, 50);
+    glutCreateWindow("Tranformations 2D");
+
+    // inicializa arena e jogadores
+    inicializaObjetos();
+ 
+    // define callbacks
+    glutDisplayFunc(renderScene);
+    glutKeyboardFunc(keyPress);
+    glutIdleFunc(idle);
+    glutKeyboardUpFunc(keyUp);
+
+    glutMouseFunc(mouseClick);
+    glutMotionFunc(mouseMove);
+    glutPassiveMotionFunc(mouseMove);
+    
+    init();
+ 
+    glutMainLoop();
+ 
+    return 0;
+}
