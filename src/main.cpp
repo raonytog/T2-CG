@@ -46,6 +46,8 @@ const GLint viewing_height = 500;
 const GLint fov = 60;
 const GLfloat aspect_ratio = (GLfloat)viewing_width / (GLfloat)viewing_height;
 
+const GLfloat light_position[] = {0, 0, 600, 1};
+
 // Objetos
 Arena *arena = nullptr;
 
@@ -253,14 +255,30 @@ void renderScene(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
     // p1
     glViewport(0, 0, 400, 500);
     glLoadIdentity();
-    gluLookAt(100, -100, 100, 
+    gluLookAt(400, -100, 100, 
               0, 0, 0, 
               0, 0, 1);
 
-    DrawAxes(50);
+    arena->Desenha();
+    j_1->Desenha();
+    j_2->Desenha();
+    DrawAxes(100);
+
+    // p2
+    glViewport(400, 0, 400, 500);
+    glLoadIdentity();
+    gluLookAt(-400, -100, 100, 
+              0, 0, 0, 
+              0, 0, 1);
+
+    arena->Desenha();
+    DrawAxes(100);
 
     if (estado > 0) MensagemDeVitoria(0, 0);
     
@@ -599,6 +617,9 @@ void init()
 {
     resetKeyStatus();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // fundo preto
+    glShadeModel (GL_SMOOTH);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
     glEnable(GL_DEPTH_TEST);
  
     glMatrixMode(GL_PROJECTION);
