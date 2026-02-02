@@ -178,25 +178,21 @@ void DesenhaCoracoes(int vidas_1, int vidas_2)
 void renderScene(void)
 {
     // limpa a tela
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    arena->Desenha();
+    // arena->Desenha();
 
-    j_1->DesenhaParteInferior();
-    j_2->DesenhaParteInferior();
+    // j_1->DesenhaParteInferior();
+    // j_2->DesenhaParteInferior();
 
-    for (auto& tiro : tiros)
-    {
-        tiro.Desenha();
-    }
+    // for (auto& tiro : tiros) { tiro.Desenha(); }
 
-    j_1->DesenhaParteSuperior();
-    j_2->DesenhaParteSuperior();
+    // j_1->DesenhaParteSuperior();
+    // j_2->DesenhaParteSuperior();
 
-    DesenhaCoracoes(j_1->Vidas(), j_2->Vidas());
+    // DesenhaCoracoes(j_1->Vidas(), j_2->Vidas());
 
-    if (estado > 0)
-        MensagemDeVitoria(0, 0);
+    // if (estado > 0) MensagemDeVitoria(0, 0);
     
     // desenha o novo frame do jogo
     glutSwapBuffers();
@@ -534,6 +530,7 @@ void init()
 {
     resetKeyStatus();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // fundo preto
+    glEnable(GL_DEPTH_TEST);
  
     glMatrixMode(GL_PROJECTION);
     glOrtho(-(viewing_width/2),  // coordenada X do canto esquerdo
@@ -632,12 +629,12 @@ int main(int argc, char *argv[])
 
     // inicializa openGL
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GL_DEPTH);
  
     // cria a janela
     glutInitWindowSize(width, height);
     glutInitWindowPosition(150, 50);
-    glutCreateWindow("Tranformations 2D");
+    glutCreateWindow("Tranformations 3D");
 
     // inicializa arena e jogadores
     inicializaObjetos();

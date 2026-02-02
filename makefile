@@ -16,7 +16,7 @@ all: src/*.cpp includes/*.h
 
 run:
 	make
-	./trabalhocg ARENA
+	./trabalhocg $(ARENA)
 
 clean:
 	rm -f trabalhocg trabalho_valgrind valgrind_out.txt
