@@ -44,7 +44,7 @@ const GLint viewing_width = 400;
 const GLint viewing_height = 500;
 
 const GLint fov = 60;
-const GLint aspect_ratio = viewing_width / viewing_height;
+const GLfloat aspect_ratio = (GLfloat)viewing_width / (GLfloat)viewing_height;
 
 // Objetos
 Arena *arena = nullptr;
@@ -256,14 +256,11 @@ void renderScene(void)
     // p1
     glViewport(0, 0, 400, 500);
     glLoadIdentity();
-    gluLookAt(0, 0, 1,
-              0, 0, 0,
-              0, 1, 0);
+    gluLookAt(100, -100, 100, 
+              0, 0, 0, 
+              0, 0, 1);
 
-    DrawAxes(5);
-
-    
-
+    DrawAxes(50);
 
     if (estado > 0) MensagemDeVitoria(0, 0);
     
@@ -607,7 +604,7 @@ void init()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    gluPerspective(fov, aspect_ratio, 1, 15);
+    gluPerspective(fov, aspect_ratio, 1, 2000);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
