@@ -260,23 +260,40 @@ void DrawAxes(double size) {
     glPopMatrix();
 }
 
+// Em src/main.cpp
+
 void ConfiguraCameraJogador(Jogador* p) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(fov, aspect_ratio, 0.1, 2000); // Near plane ajustado
+    gluPerspective(fov, aspect_ratio, 0.1, 2000);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
-    float eyeX = p->X();
-    float eyeY = p->Y()+20;
-    float eyeZ = p->RaioColisao(); // Função nova necessária no Jogador
+    // 1. Posição do Olho (Câmera)
+    float eyeX = p->X() + p->RaioColisao();
+    float eyeY = p->Y();
+    
+    // A altura deve ser baseada na proporção do corpo definida em jogador.cpp
+    // Se ALTURA_MEMBROS não estiver acessível aqui, defina-o ou use o valor numérico.
+    // Assumindo que ALTURA_MEMBROS é acessível via headers:
+    float alturaCabeca = ALTURA_MEMBROS * 2.5f; 
+    
+    // Adicionamos um pouco mais (+ raio da cabeça) para ficar na altura dos olhos
+    float eyeZ = alturaCabeca;; 
 
+    // 2. Para onde a câmera olha (LookAt)
+    // Convertemos o ângulo do jogador para radianos
     float theta_rad = p->Theta() * M_PI / 180.0f;
+
+    // O ponto de foco é um ponto à frente do jogador na mesma altura dos olhos
     float lookX = eyeX + cos(theta_rad);
     float lookY = eyeY + sin(theta_rad);
-    float lookZ = eyeZ; // Olha reto
+    float lookZ = eyeZ; // Olha reto no horizonte
 
-    gluLookAt(eyeX, eyeY, eyeZ, lookX, lookY, lookZ, 0, 0, 1);
+    // 3. Vetor Up (O topo da cabeça aponta para Z positivo)
+    gluLookAt(eyeX, eyeY, eyeZ,  // Olho
+              lookX, lookY, lookZ,  // Foco
+              0.0f, 0.0f, 1.0f);    // Up Vector
 }
 
 void renderScene(void)
