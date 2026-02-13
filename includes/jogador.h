@@ -6,6 +6,7 @@
 
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <GL/glut.h>
 
 #include <algorithm>
 #include <math.h>
@@ -33,13 +34,12 @@
 
 #define TIMER_TIRO 500.0f // ms
 
+#define ALTURA_MEMBROS 10.0f
+
 class Jogador {
-    GLfloat gX; 
-    GLfloat gY;
+    GLfloat gX, gY, gZ;
     GLfloat raio;
-    GLfloat R;
-    GLfloat G;
-    GLfloat B;
+    GLfloat R, G, B;
     GLfloat animacao;
     GLfloat gTheta;
     GLfloat gThetaBraco;
@@ -48,22 +48,23 @@ class Jogador {
 private:
     void DesenhaBraco(GLfloat raio, GLfloat R, GLfloat G, GLfloat B, GLfloat theta_braco);
     void DesenhaPerna(GLfloat raio, GLfloat animacao);
-    void DesenhaJogador(GLfloat x, GLfloat y, GLfloat raio,
+    void DesenhaJogador(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
                         GLfloat R, GLfloat G, GLfloat B,
                         GLfloat animacao, GLfloat theta, GLfloat theta_braco, int vidas);
-    void DesenhaSuperior(GLfloat x, GLfloat y, GLfloat raio,
+    void DesenhaSuperior(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
                          GLfloat R, GLfloat G, GLfloat B,
                          GLfloat animacao, GLfloat theta, GLfloat theta_braco, int vidas);
-    void DesenhaInferior(GLfloat x, GLfloat y, GLfloat raio,
+    void DesenhaInferior(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
                          GLfloat R, GLfloat G, GLfloat B,
                          GLfloat animacao, GLfloat theta, GLfloat theta_braco, int vidas);
 
 public:
-    Jogador(GLfloat x, GLfloat y, GLfloat raio,
+    Jogador(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
             GLfloat R, GLfloat G, GLfloat B, GLfloat theta, int vidas)
     {
         this->gX = x; 
         this->gY = y;
+        this->gZ = z;
         this->raio = raio;
         this->R = R;
         this->G = G;
@@ -77,15 +78,15 @@ public:
 
     void Desenha()
     { 
-        DesenhaJogador(gX, gY, raio, R, G, B, animacao, gTheta, gThetaBraco, vidas);
+        DesenhaJogador(gX, gY, gZ, raio, R, G, B, animacao, gTheta, gThetaBraco, vidas);
     };
     void DesenhaParteSuperior()
     { 
-        DesenhaSuperior(gX, gY, raio, R, G, B, animacao, gTheta, gThetaBraco, vidas);
+        DesenhaSuperior(gX, gY, gZ, raio, R, G, B, animacao, gTheta, gThetaBraco, vidas);
     };
     void DesenhaParteInferior()
     { 
-        DesenhaInferior(gX, gY, raio, R, G, B, animacao, gTheta, gThetaBraco, vidas);
+        DesenhaInferior(gX, gY, gZ, raio, R, G, B, animacao, gTheta, gThetaBraco, vidas);
     };
 
     void Move(GLfloat dist, GLfloat t_d);
@@ -99,6 +100,7 @@ public:
     GLfloat Y();
     void MoveX(GLfloat dX);
     void MoveY(GLfloat dX);
+    void MoveZ(GLfloat dX);
 
     GLfloat EspessuraBraco();
     GLfloat RaioColisao();

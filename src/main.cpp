@@ -48,6 +48,10 @@ const GLfloat aspect_ratio = (GLfloat)viewing_width / (GLfloat)viewing_height;
 
 const GLfloat light_position[] = {0, 0, 600, 1};
 
+const GLfloat luz_ambiente[] = { 0.2f, 0.2f, 0.2f, 1.0f }; 
+const GLfloat luz_difusa[]   = { 0.7f, 0.7f, 0.7f, 1.0f };
+const GLfloat luz_especular[]= { 1.0f, 1.0f, 1.0f, 1.0f };
+
 // Objetos
 Arena *arena = nullptr;
 
@@ -251,6 +255,25 @@ void DrawAxes(double size) {
     glPopMatrix();
 }
 
+void ConfiguraCameraJogador(Jogador* p) {
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(fov, aspect_ratio, 0.1, 2000); // Near plane ajustado
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    
+    float eyeX = p->X();
+    float eyeY = p->Y()+20;
+    float eyeZ = p->RaioColisao(); // Função nova necessária no Jogador
+
+    float theta_rad = p->Theta() * M_PI / 180.0f;
+    float lookX = eyeX + cos(theta_rad);
+    float lookY = eyeY + sin(theta_rad);
+    float lookZ = eyeZ; // Olha reto
+
+    gluLookAt(eyeX, eyeY, eyeZ, lookX, lookY, lookZ, 0, 0, 1);
+}
+
 void renderScene(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -259,26 +282,20 @@ void renderScene(void)
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
     // p1
-    glViewport(0, 0, 400, 500);
-    glLoadIdentity();
-    gluLookAt(400, -100, 100, 
-              0, 0, 0, 
-              0, 0, 1);
+    glViewport(0, 0, width/2, height);
+    ConfiguraCameraJogador(j_1);
+    // glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    arena->Desenha();
+    j_1->Desenha();
+    j_2->Desenha();
+
+    // p2
+    glViewport(width/2, 0, width, height);
+    ConfiguraCameraJogador(j_2);
 
     arena->Desenha();
     j_1->Desenha();
     j_2->Desenha();
-    DrawAxes(100);
-
-    // p2
-    glViewport(400, 0, 400, 500);
-    glLoadIdentity();
-    gluLookAt(-400, -100, 100, 
-              0, 0, 0, 
-              0, 0, 1);
-
-    arena->Desenha();
-    DrawAxes(100);
 
     if (estado > 0) MensagemDeVitoria(0, 0);
     
@@ -297,9 +314,11 @@ void reset()
     // procura os valores iniciais dos jogadores
     float x_1 = 0.0f;
     float y_1 = 0.0f;
+    float z_1 = 0.0f;
     float r_1 = 0.0f;
     float x_2 = 0.0f;
     float y_2 = 0.0f;
+    float z_2 = 0.0f;
     float r_2 = 0.0f;
 
     for (auto& c : circulos) {
@@ -331,8 +350,8 @@ void reset()
 
     delete j_1;
     delete j_2;
-    j_1 = new Jogador(x_1, y_1, r_1, 1.0f, 0.0f, 0.0f, theta_1, 3);
-    j_2 = new Jogador(x_2, y_2, r_2, 0.0f, 1.0f, 0.0f, theta_2, 3);
+    j_1 = new Jogador(x_1, y_1, z_1, r_1, 1.0f, 0.0f, 0.0f, theta_1, 3);
+    j_2 = new Jogador(x_2, y_2, z_2, r_2, 0.0f, 1.0f, 0.0f, theta_2, 3);
 
     for (auto& c : circulos) {
         if (c.cor == "black")
@@ -616,11 +635,18 @@ void idle(void)
 void init()
 {
     resetKeyStatus();
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // fundo preto
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glShadeModel (GL_SMOOTH);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_DEPTH_TEST);
+
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT, luz_ambiente);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_difusa);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, luz_especular);
  
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -661,9 +687,11 @@ void inicializaObjetos()
     // procura os valores iniciais dos jogadores
     float x_1 = 0.0f;
     float y_1 = 0.0f;
+    float z_1 = 0.0f;
     float r_1 = 0.0f;
     float x_2 = 0.0f;
     float y_2 = 0.0f;
+    float z_2 = 0.0f;
     float r_2 = 0.0f;
 
     for (auto& c : circulos) {
@@ -689,8 +717,8 @@ void inicializaObjetos()
     GLfloat theta_2 = normalizaAnguloGraus(theta_1 + 180.0f);
 
     arena = new Arena(0.0f, 0.0f, 0.0f, std::min(viewing_width, viewing_height) / 2.0f, 0.0f, 0.0f, 1.0f);
-    j_1 = new Jogador(x_1, y_1, r_1, 1.0f, 0.0f, 0.0f, theta_1, 3);
-    j_2 = new Jogador(x_2, y_2, r_2, 0.0f, 1.0f, 0.0f, theta_2, 3);
+    j_1 = new Jogador(x_1, y_1, z_1, r_1, 1.0f, 0.0f, 0.0f, theta_1, 3);
+    j_2 = new Jogador(x_2, y_2, z_2, r_2, 0.0f, 1.0f, 0.0f, theta_2, 3);
 
     for (auto& c : circulos) {
         if (c.cor == "black")

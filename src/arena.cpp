@@ -5,6 +5,7 @@ void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
 {
     glPushMatrix();
     glTranslatef(x, y, z);
+    printf("%f %f %f\n", x, y, z);
 
     DesenhaCirc(raio, R, G, B, DETALHE_ARENA);
 

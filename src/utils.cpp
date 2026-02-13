@@ -36,21 +36,29 @@ void DesenhaRectCentrado(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat
     glEnd();
 }
 
-void DesenhaRectXPos(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B)
+void DesenhaRectXPos(GLfloat d_x, GLfloat d_y, GLfloat d_z, GLfloat R, GLfloat G, GLfloat B)
 {
     glColor3f(R, G, B);
+    // glBegin(GL_QUADS);
 
-    glBegin(GL_QUADS);
+    // glVertex2f(d_x, d_y / 2.0f);
+    // glVertex2f(0.0f, d_y / 2.0f);
+    // glVertex2f(0.0f, -d_y / 2.0f);
+    // glVertex2f(d_x, -d_y / 2.0f);
 
-    glVertex2f(d_x, d_y / 2.0f);
-    glVertex2f(0.0f, d_y / 2.0f);
-    glVertex2f(0.0f, -d_y / 2.0f);
-    glVertex2f(d_x, -d_y / 2.0f);
+    // glEnd();
 
-    glEnd();
+    glPushMatrix();
+        // glTranslatef(d_x / 2.0f, 0.0f, d_z / 2.0f);
+
+        // Escala o cubo unitário para as dimensões desejadas
+        glScalef(d_x, d_y, d_z);
+
+        glutSolidCube(1.0f);
+    glPopMatrix();
 }
 
-void DesenhaRectYPos(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B)
+void DesenhaRectYPos(GLfloat d_x, GLfloat d_y, GLfloat d_z, GLfloat R, GLfloat G, GLfloat B)
 {
     glColor3f(R, G, B);
 
@@ -64,7 +72,7 @@ void DesenhaRectYPos(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B)
     glEnd();
 }
 
-void DesenhaRectPos(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B)
+void DesenhaRectPos(GLfloat d_x, GLfloat d_y, GLfloat d_z, GLfloat R, GLfloat G, GLfloat B)
 {
     glColor3f(R, G, B);
 

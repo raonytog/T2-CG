@@ -3,6 +3,7 @@
 
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <GL/glut.h>
 
 #include <math.h>
 
@@ -13,9 +14,9 @@ float normalizaAnguloRadianos(float angulo);
 float limite(float val, float a, float b);
 
 void DesenhaRectCentrado(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B);
-void DesenhaRectXPos(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B);
-void DesenhaRectYPos(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B);
-void DesenhaRectPos(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B);
+void DesenhaRectXPos(GLfloat d_x, GLfloat d_y, GLfloat d_z, GLfloat R, GLfloat G, GLfloat B);
+void DesenhaRectYPos(GLfloat d_x, GLfloat d_y, GLfloat d_z,  GLfloat R, GLfloat G, GLfloat B);
+void DesenhaRectPos(GLfloat d_x, GLfloat d_y, GLfloat d_z,  GLfloat R, GLfloat G, GLfloat B);
 void DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B, int detalhe);
 void DesenhaElipse(GLfloat r_x, GLfloat r_y, GLfloat R, GLfloat G, GLfloat B, int detalhe);
 void DesenhaXis(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B);
