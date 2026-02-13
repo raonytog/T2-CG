@@ -15,32 +15,32 @@ void Jogador::DesenhaBraco(GLfloat raio, GLfloat R, GLfloat G, GLfloat B, GLfloa
     glPopMatrix();
 }
 
-void rect(GLfloat raio, GLfloat animacao) {
-    glPushMatrix();
-        glTranslatef(0, raio * PERNA_DISTANCIA, 0.0f);
-        // glScalef(raio * PERNA_COMPRIMENTO * sin(animacao), raio * PERNA_ESPESSURA, ALTURA_MEMBROS);
-        glutSolidCube(raio);
-    glPopMatrix();
-}
-
 void Jogador::DesenhaPerna(GLfloat raio, GLfloat animacao)
 {
 
-    GLfloat SCALE = 5;
+    GLfloat SCALE_COMPRIMENTO = 2, SCALE_ESPESSURA = 4, SCALE_ALTURA = 1;
     glPushMatrix();
         glTranslatef(0.0f, raio * PERNA_DISTANCIA, 0.0f);
-        DesenhaRectXPos(raio * PERNA_COMPRIMENTO * sin(animacao) * SCALE,
-                        raio * PERNA_ESPESSURA, 
-                        ALTURA_MEMBROS, 
-                        0.0f, 0.0f, 0.0f);
+        // DesenhaRectXPos(raio * PERNA_COMPRIMENTO * sin(animacao),
+        //                 raio * PERNA_ESPESSURA, 
+        //                 ALTURA_MEMBROS, 
+        //                 1.0f, 0.0f, 0.0f);
+        DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO * sin(animacao),
+                        PERNA_ESPESSURA * SCALE_ESPESSURA, 
+                        ALTURA_MEMBROS * SCALE_ALTURA, 
+                        1.0f, 0.0f, 0.0f);
     glPopMatrix();
 
     glPushMatrix();
         glTranslatef(0.0f, -raio * PERNA_DISTANCIA, 0.0f);
-        DesenhaRectXPos(-raio * PERNA_COMPRIMENTO * sin(animacao) * SCALE,
-                         raio * PERNA_ESPESSURA, 
-                         ALTURA_MEMBROS, 
-                         0.0f, 0.0f, 0.0f);
+        // DesenhaRectXPos(-raio * PERNA_COMPRIMENTO * sin(animacao),
+        //                  raio * PERNA_ESPESSURA, 
+        //                  ALTURA_MEMBROS, 
+        //                  0.0f, 0.0f, 0.0f);
+        DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO * sin(animacao),
+                        PERNA_ESPESSURA * SCALE_ESPESSURA, 
+                        ALTURA_MEMBROS * SCALE_ALTURA, 
+                        1.0f, 0.0f, 0.0f);
     glPopMatrix();
 }
 
