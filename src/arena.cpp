@@ -11,8 +11,8 @@ void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
     for (auto& obst : this->obstaculos)
     {
         glPushMatrix();
-            glTranslatef(obst.x, obst.y, obst.z);
-            DesenhaCilindro(obst.raio, 10, 1,1,1, DETALHE_OBSTACULO);
+            glTranslatef(obst.x, obst.y, 0);
+            DesenhaCilindro(obst.raio, ALTURA_OBSTACULO, 1,1,1, DETALHE_OBSTACULO);
         glPopMatrix();
     }
 }

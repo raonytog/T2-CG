@@ -14,12 +14,11 @@
 
 #define DETALHE_ARENA 120
 #define DETALHE_OBSTACULO 36
+#define ALTURA_OBSTACULO ALTURA_MEMBROS*3
 
 struct Obstaculo
 {
-    float x;
-    float y;
-    float z;
+    float x, y, z;
     float raio;
 };
 
@@ -37,22 +36,18 @@ public:
 
     Arena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio, GLfloat R, GLfloat G, GLfloat B)
     {
-        this->gX = x; 
-        this->gY = y;
-        this->gZ = z;
+        this->gX = x;   this->gY = y;   this->gZ = z;
+        this->R = R;    this->G = G;    this->B = B;
         this->raio = raio;
-        this->R = R;
-        this->G = G;
-        this->B = B;
     };
     void Desenha()
     { 
         DesenhaArena(gX, gY, gZ, raio, R, G, B);
     };
 
-    void adicionaObstaculo(float x, float y, float r)
+    void adicionaObstaculo(float x, float y, float z, float r)
     {
-        this->obstaculos.emplace_back(Obstaculo{x, y, r});
+        this->obstaculos.emplace_back(Obstaculo{x, y, z, r});
     }
 
     GLfloat X();

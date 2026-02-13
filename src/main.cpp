@@ -360,7 +360,7 @@ void reset()
     for (auto& c : circulos) {
         if (c.cor == "black")
         {
-            arena->adicionaObstaculo(c.x, c.y, c.raio);
+            arena->adicionaObstaculo(c.x, c.y, 0, c.raio);
         }
     }
 
@@ -730,7 +730,7 @@ void inicializaObjetos()
     for (auto& c : circulos) {
         if (c.cor == "black")
         {
-            arena->adicionaObstaculo(c.x, c.y, c.raio);
+            arena->adicionaObstaculo(c.x, c.y, 0, c.raio);
         }
     }
 
