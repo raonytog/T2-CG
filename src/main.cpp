@@ -190,6 +190,7 @@ void PosicionaCamera(Jogador* p) {
     // Pegamos a posição e o ângulo do jogador
     float x = p->X();
     float y = p->Y();
+    float r = p->RaioColisao();
     // Assumindo que o ângulo no seu Jogador está em graus e precisa converter para radianos
     // Se já tiver getter para radianos, use-o.
     // O deslocamento -50 coloca a câmera "atrás" (ajuste conforme a escala do seu mundo)
@@ -199,9 +200,13 @@ void PosicionaCamera(Jogador* p) {
 
     // Posição do Olho (Câmera)
     // Calcula x/y atrás do jogador baseado no ângulo
-    float cam_x = x - dist_camera * cos(theta_rad);
-    float cam_y = y - dist_camera * sin(theta_rad);
-    float cam_z = altura_camera; // Altura da câmera (Z é up)
+    // float cam_x = x - dist_camera * cos(theta_rad);
+    // float cam_y = y - dist_camera * sin(theta_rad);
+    // float cam_z = altura_camera; // Altura da câmera (Z é up)
+
+    float cam_x = x;
+    float cam_y = y;
+    float cam_z = ALTURA_MEMBROS*3;
 
     // Ponto para onde a câmera olha (Centro do Jogador)
     float look_x = x;
@@ -284,13 +289,12 @@ void renderScene(void)
     // p1
     glViewport(0, 0, width/2, height);
     ConfiguraCameraJogador(j_1);
-    // glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     arena->Desenha();
     j_1->Desenha();
     j_2->Desenha();
 
     // p2
-    glViewport(width/2, 0, width, height);
+    glViewport(width/2, 0, width/2, height);
     ConfiguraCameraJogador(j_2);
 
     arena->Desenha();

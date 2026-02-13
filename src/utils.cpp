@@ -27,31 +27,19 @@ void DesenhaRectCentrado(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat
     glColor3f(R, G, B);
 
     glBegin(GL_QUADS);
-
-    glVertex2f(d_x / 2.0f, d_y / 2.0f);
-    glVertex2f(-d_x / 2.0f, d_y / 2.0f);
-    glVertex2f(-d_x / 2.0f, -d_y / 2.0f);
-    glVertex2f(d_x / 2.0f, -d_y / 2.0f);
-
+        glVertex2f(d_x / 2.0f, d_y / 2.0f);
+        glVertex2f(-d_x / 2.0f, d_y / 2.0f);
+        glVertex2f(-d_x / 2.0f, -d_y / 2.0f);
+        glVertex2f(d_x / 2.0f, -d_y / 2.0f);
     glEnd();
 }
 
 void DesenhaRectXPos(GLfloat d_x, GLfloat d_y, GLfloat d_z, GLfloat R, GLfloat G, GLfloat B)
 {
     glColor3f(R, G, B);
-    // glBegin(GL_QUADS);
-
-    // glVertex2f(d_x, d_y / 2.0f);
-    // glVertex2f(0.0f, d_y / 2.0f);
-    // glVertex2f(0.0f, -d_y / 2.0f);
-    // glVertex2f(d_x, -d_y / 2.0f);
-
-    // glEnd();
 
     glPushMatrix();
-        // glTranslatef(d_x / 2.0f, 0.0f, d_z / 2.0f);
-
-        // Escala o cubo unitário para as dimensões desejadas
+        glTranslatef(d_x / 2.0f, 0.0f, d_z / 2.0f);
         glScalef(d_x, d_y, d_z);
 
         glutSolidCube(1.0f);
@@ -63,12 +51,10 @@ void DesenhaRectYPos(GLfloat d_x, GLfloat d_y, GLfloat d_z, GLfloat R, GLfloat G
     glColor3f(R, G, B);
 
     glBegin(GL_QUADS);
-
-    glVertex2f(d_x / 2.0f, d_y);
-    glVertex2f(-d_x / 2.0f, d_y);
-    glVertex2f(-d_x / 2.0f, 0.0f);
-    glVertex2f(d_x / 2.0f, 0.0f);
-
+        glVertex2f(d_x / 2.0f, d_y);
+        glVertex2f(-d_x / 2.0f, d_y);
+        glVertex2f(-d_x / 2.0f, 0.0f);
+        glVertex2f(d_x / 2.0f, 0.0f);
     glEnd();
 }
 
@@ -77,38 +63,55 @@ void DesenhaRectPos(GLfloat d_x, GLfloat d_y, GLfloat d_z, GLfloat R, GLfloat G,
     glColor3f(R, G, B);
 
     glBegin(GL_QUADS);
+        glVertex2f(d_x, d_y);
+        glVertex2f(0.0f, d_y);
+        glVertex2f(0.0f, 0.0f);
+        glVertex2f(d_x, 0.0f);
+    glEnd();
+}
 
-    glVertex2f(d_x, d_y);
-    glVertex2f(0.0f, d_y);
-    glVertex2f(0.0f, 0.0f);
-    glVertex2f(d_x, 0.0f);
+void DesenhaCilindro(GLfloat radius, GLfloat z, GLfloat R, GLfloat G, GLfloat B, int detalhe) {
+    glColor3f(1,1,1);
+    glPointSize(1.0f);
+    float angle;
 
+    glBegin(GL_QUAD_STRIP);
+    for (int i = 0; i <= detalhe; i++) {
+        angle = i * M_PI * 2 / detalhe;
+        glVertex3f(radius * cos(angle), radius * sin(angle), 0.0f);
+        glVertex3f(radius * cos(angle), radius * sin(angle), z);
+    }
+    glEnd();
+
+    glBegin(GL_POLYGON); // fecha o cilindro
+    for (int i = 0; i < detalhe; i++) {
+        angle = i * PI * 2 / detalhe;
+        glVertex3f(radius * cos(angle), radius * sin(angle), z);
+    }
     glEnd();
 }
 
 void DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B, int detalhe)
 {
     glColor3f(R, G, B);
-
     glPointSize(1.0f);
 
     glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < detalhe; i++) {
-        glVertex3f(radius * cos(i * PI * 2 / detalhe), radius * sin(i * PI * 2 / detalhe), 0.0f);
-    }
+        for (int i = 0; i < detalhe; i++) {
+            glVertex3f(radius * cos(i * PI * 2 / detalhe), radius * sin(i * PI * 2 / detalhe), 0.0f);
+        }
     glEnd();
 }
 
 void DesenhaElipse(GLfloat r_x, GLfloat r_y, GLfloat R, GLfloat G, GLfloat B, int detalhe)
 {
     glColor3f(R, G, B);
-
     glPointSize(1.0f);
 
     glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < detalhe; i++) {
-        glVertex2f(r_x * cos(i * PI * 2 / detalhe), r_y * sin(i * PI * 2 / detalhe));
-    }
+        for (int i = 0; i < detalhe; i++) {
+            glVertex2f(r_x * cos(i * PI * 2 / detalhe), r_y * sin(i * PI * 2 / detalhe));
+        }
     glEnd();
 }
 
@@ -120,24 +123,21 @@ void DesenhaXis(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B)
     // ◥◤◥◤
 
     glColor3f(R, G, B);
-
     glPointSize(1.0f);
 
     glBegin(GL_TRIANGLE_FAN);
-
-    glVertex2f(d_x / 4.0f, 0.0f);
-    glVertex2f(d_x / 2.0f, d_y / 4.0f);
-    glVertex2f(d_x / 4.0f, d_y / 2.0f);
-    glVertex2f(0.0f, d_y / 4.0f);
-    glVertex2f(-d_x / 4.0f, d_y / 2.0f);
-    glVertex2f(-d_x / 2.0f, d_y / 4.0f);
-    glVertex2f(-d_x / 4.0f, 0.0f);
-    glVertex2f(-d_x / 2.0f, -d_y / 4.0f);
-    glVertex2f(-d_x / 4.0f, -d_y / 2.0f);
-    glVertex2f(0.0f, -d_y / 4.0f);
-    glVertex2f(d_x / 4.0f, -d_y / 2.0f);
-    glVertex2f(d_x / 2.0f, -d_y / 4.0f);
-
+        glVertex2f(d_x / 4.0f, 0.0f);
+        glVertex2f(d_x / 2.0f, d_y / 4.0f);
+        glVertex2f(d_x / 4.0f, d_y / 2.0f);
+        glVertex2f(0.0f, d_y / 4.0f);
+        glVertex2f(-d_x / 4.0f, d_y / 2.0f);
+        glVertex2f(-d_x / 2.0f, d_y / 4.0f);
+        glVertex2f(-d_x / 4.0f, 0.0f);
+        glVertex2f(-d_x / 2.0f, -d_y / 4.0f);
+        glVertex2f(-d_x / 4.0f, -d_y / 2.0f);
+        glVertex2f(0.0f, -d_y / 4.0f);
+        glVertex2f(d_x / 4.0f, -d_y / 2.0f);
+        glVertex2f(d_x / 2.0f, -d_y / 4.0f);
     glEnd();
 }
 
@@ -153,23 +153,26 @@ void DesenhaCoracao(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B, i
     glPointSize(1.0f);
 
     glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < detalhe; i++) {
-        t = (float) i / detalhe;
-        glVertex2f((d_x / 4.0f) * (-cos(PI * t) + 1), (d_y / 4.0f) * (sin(PI * t) + 1));
-    }
-    for (int i = 0; i < detalhe; i++) {
-        t = 1.0f + (float) i / detalhe;
-        glVertex2f((d_x / 4.0f) * (-cos(PI * t) + 1),
-                   (d_y / 4.0f) * ((-t + 2) * (sin(PI * t) + 1) + (t - 1) * (-cos(PI * t) - 1)));
-    }
-    for (int i = 0; i < detalhe; i++) {
-        t = 2.0f + (float) i / detalhe;
-        glVertex2f((d_x / 4.0f) * (cos(PI * t) - 1),
-                   (d_y / 4.0f) * ((-t + 3) * (-cos(PI * t) - 1) + (t - 2) * (-sin(PI * t) + 1)));
-    }
-    for (int i = 0; i < detalhe; i++) {
-        t = 3.0f + (float) i / detalhe;
-        glVertex2f((d_x / 4.0f) * (cos(PI * t) - 1), (d_y / 4.0f) * (-sin(PI * t) + 1));
-    }
+        for (int i = 0; i < detalhe; i++) {
+            t = (float) i / detalhe;
+            glVertex2f((d_x / 4.0f) * (-cos(PI * t) + 1), (d_y / 4.0f) * (sin(PI * t) + 1));
+        }
+
+        for (int i = 0; i < detalhe; i++) {
+            t = 1.0f + (float) i / detalhe;
+            glVertex2f((d_x / 4.0f) * (-cos(PI * t) + 1),
+                    (d_y / 4.0f) * ((-t + 2) * (sin(PI * t) + 1) + (t - 1) * (-cos(PI * t) - 1)));
+        }
+
+        for (int i = 0; i < detalhe; i++) {
+            t = 2.0f + (float) i / detalhe;
+            glVertex2f((d_x / 4.0f) * (cos(PI * t) - 1),
+                    (d_y / 4.0f) * ((-t + 3) * (-cos(PI * t) - 1) + (t - 2) * (-sin(PI * t) + 1)));
+        }
+
+        for (int i = 0; i < detalhe; i++) {
+            t = 3.0f + (float) i / detalhe;
+            glVertex2f((d_x / 4.0f) * (cos(PI * t) - 1), (d_y / 4.0f) * (-sin(PI * t) + 1));
+        }
     glEnd();
 }

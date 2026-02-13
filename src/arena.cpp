@@ -4,20 +4,17 @@ void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
                          GLfloat R, GLfloat G, GLfloat B)
 {
     glPushMatrix();
-    glTranslatef(x, y, z);
-    printf("%f %f %f\n", x, y, z);
-
-    DesenhaCirc(raio, R, G, B, DETALHE_ARENA);
+        glTranslatef(x, y, z);
+        DesenhaCirc(raio, R, G, B, DETALHE_ARENA);
+    glPopMatrix();
 
     for (auto& obst : this->obstaculos)
     {
         glPushMatrix();
-        glTranslatef(obst.x, obst.y, obst.z);
-        DesenhaCirc(obst.raio, 0.0f, 0.0f, 0.0f, DETALHE_OBSTACULO);
+            glTranslatef(obst.x, obst.y, obst.z);
+            DesenhaCilindro(obst.raio, 10, 1,1,1, DETALHE_OBSTACULO);
         glPopMatrix();
     }
-
-    glPopMatrix();
 }
 
 GLfloat Arena::X()

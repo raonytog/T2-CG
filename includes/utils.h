@@ -7,6 +7,9 @@
 
 #include <math.h>
 
+#define ARENA 120
+#define OBSTACULO 36
+
 #define PI (float) M_PI
 
 float normalizaAnguloGraus(float angulo);
@@ -18,6 +21,7 @@ void DesenhaRectXPos(GLfloat d_x, GLfloat d_y, GLfloat d_z, GLfloat R, GLfloat G
 void DesenhaRectYPos(GLfloat d_x, GLfloat d_y, GLfloat d_z,  GLfloat R, GLfloat G, GLfloat B);
 void DesenhaRectPos(GLfloat d_x, GLfloat d_y, GLfloat d_z,  GLfloat R, GLfloat G, GLfloat B);
 void DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B, int detalhe);
+void DesenhaCilindro(GLfloat radius, GLfloat z, GLfloat R, GLfloat G, GLfloat B, int detalhe);
 void DesenhaElipse(GLfloat r_x, GLfloat r_y, GLfloat R, GLfloat G, GLfloat B, int detalhe);
 void DesenhaXis(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B);
 void DesenhaCoracao(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B, int detalhe);
