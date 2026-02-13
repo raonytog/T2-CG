@@ -272,20 +272,11 @@ void ConfiguraCameraJogador(Jogador* p) {
     // 1. Posição do Olho (Câmera)
     float eyeX = p->X() + p->RaioColisao();
     float eyeY = p->Y();
-    
-    // A altura deve ser baseada na proporção do corpo definida em jogador.cpp
-    // Se ALTURA_MEMBROS não estiver acessível aqui, defina-o ou use o valor numérico.
-    // Assumindo que ALTURA_MEMBROS é acessível via headers:
-    float alturaCabeca = ALTURA_MEMBROS * 2.5f; 
-    
-    // Adicionamos um pouco mais (+ raio da cabeça) para ficar na altura dos olhos
-    float eyeZ = alturaCabeca;; 
+    float eyeZ = ALTURA_MEMBROS * 2.5f;
 
-    // 2. Para onde a câmera olha (LookAt)
-    // Convertemos o ângulo do jogador para radianos
     float theta_rad = p->Theta() * M_PI / 180.0f;
 
-    // O ponto de foco é um ponto à frente do jogador na mesma altura dos olhos
+    // 2. Look vector 
     float lookX = eyeX + cos(theta_rad);
     float lookY = eyeY + sin(theta_rad);
     float lookZ = eyeZ; // Olha reto no horizonte

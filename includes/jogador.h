@@ -47,7 +47,7 @@ class Jogador {
     GLfloat timerTiro;
 private:
     void DesenhaBraco(GLfloat raio, GLfloat R, GLfloat G, GLfloat B, GLfloat theta_braco);
-    void DesenhaPerna(GLfloat raio, GLfloat animacao);
+    void DesenhaPerna(GLfloat raio, GLfloat animacao, GLfloat R, GLfloat G, GLfloat B);
     void DesenhaCorpo(GLfloat R, GLfloat G, GLfloat B);
     void DesenhaCabeca(GLfloat raio, GLfloat R, GLfloat G, GLfloat B);
     void DesenhaJogador(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,

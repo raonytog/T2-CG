@@ -15,29 +15,29 @@ void Jogador::DesenhaBraco(GLfloat raio, GLfloat R, GLfloat G, GLfloat B, GLfloa
     glPopMatrix();
 }
 
-void Jogador::DesenhaPerna(GLfloat raio, GLfloat animacao)
+void Jogador::DesenhaPerna(GLfloat raio, GLfloat animacao, GLfloat R, GLfloat G, GLfloat B)
 {
 
     GLfloat SCALE_COMPRIMENTO = 2, SCALE_ESPESSURA = 4, SCALE_ALTURA = 1;
     glPushMatrix();
         glTranslatef(0.0f, raio * PERNA_DISTANCIA / 2, 0.0f);
-        DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO * sin(animacao),
+        DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO * cos(animacao),
                         PERNA_ESPESSURA * SCALE_ESPESSURA, 
                         ALTURA_MEMBROS * SCALE_ALTURA, 
-                        0.0f, 0.0f, 0.0f);
+                        R, G, B);
     glPopMatrix();
 
     glPushMatrix();
         glTranslatef(0.0f, -raio * PERNA_DISTANCIA / 2, 0.0f);
-        DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO * sin(animacao),
+        DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO * cos(animacao),
                         PERNA_ESPESSURA * SCALE_ESPESSURA, 
                         ALTURA_MEMBROS * SCALE_ALTURA, 
-                        0.0f, 0.0f, 0.0f);
+                        R, G, B);
     glPopMatrix();
 }
 
 void Jogador::DesenhaCorpo(GLfloat R, GLfloat G, GLfloat B) {
-    GLfloat SCALE_COMPRIMENTO = 4, SCALE_ESPESSURA = 8, SCALE_ALTURA = 1;
+    GLfloat SCALE_COMPRIMENTO = 2, SCALE_ESPESSURA = 8, SCALE_ALTURA = 1;
     glPushMatrix();
         glTranslatef(0.0f, 0.0f, ALTURA_MEMBROS);
         DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO,
@@ -67,7 +67,7 @@ void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat z, GLfloat unidade,
     {
         glRotatef(theta, 0.0f, 0.0f, 1.0f);
 
-        DesenhaPerna(raio, animacao);
+        DesenhaPerna(raio, animacao, R, G, B);
         DesenhaBraco(raio, R, G, B, theta_braco);
         DesenhaCorpo(R, G, B);
         DesenhaCabeca(raio, R, G, B);
