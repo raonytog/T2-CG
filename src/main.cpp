@@ -287,12 +287,41 @@ void ConfiguraCameraJogador(Jogador* p) {
               0.0f, 0.0f, 1.0f);    // Up Vector
 }
 
+// Em src/main.cpp
+
+void DesenhaHUD()
+{
+    // reseta o viewport para a tela toda
+    glViewport(0, 0, width, height);
+
+    // Configura projeção 2D (Ortogonal)
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+        glLoadIdentity();
+        gluOrtho2D(-width/2, width/2, 
+                   -height/2, height/2);
+
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+            glLoadIdentity();
+
+            glDisable(GL_LIGHTING);
+            glDisable(GL_DEPTH_TEST);
+            DesenhaCoracoes(j_1->Vidas(), j_2->Vidas());
+
+            if (estado > 0) { MensagemDeVitoria(0, 50); }
+
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_LIGHTING);
+        glPopMatrix();
+        glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+}
+
 void renderScene(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
     // p1
     glViewport(0, 0, width/2, height);
@@ -309,6 +338,7 @@ void renderScene(void)
     j_1->Desenha();
     j_2->Desenha();
 
+    DesenhaHUD();
     if (estado > 0) MensagemDeVitoria(0, 0);
     
     glutSwapBuffers();
