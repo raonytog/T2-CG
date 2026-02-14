@@ -4,7 +4,7 @@ Base do jogo | morrer, ganhar, mensagem |  1.0  | 1
 -------------------------------------------------------
              | movimento das pernas     |  1.0  | 0.25
 Jogador 3D   | braço e tiro             |  1.0  | 0.10
-             | pulo e obstaculos        |  1.0  | 0.5 falta colisao com o obstaculo e melhorar pulo
+             | pulo e obstaculos        |  1.0  | 0.75 melhorar o pulo
 -------------------------------------------------------
              | iluminacao               |  1.0  | 1
 Aparência    | lanterna                 |  1.0  | precisa por na ponta da arma (nao fiz por isso)

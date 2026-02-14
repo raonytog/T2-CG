@@ -87,25 +87,31 @@ void Jogador::Move(GLfloat dist, GLfloat t_d)
 
 void Jogador::Pula() 
 {
-    if (this->gZ == 0.0f) 
+    if (this->gVelZ == 0.0f) 
     {
-        this->velZ = VELOCIDADE_PULO;
+        this->gVelZ = VELOCIDADE_PULO;
     }
+}
+
+void Jogador::Pousa(GLfloat z)
+{
+    this->gZ = z;
+    this->gVelZ = 0.0f;
 }
 
 void Jogador::AtualizaFisica(GLfloat t_d)
 {
     // Aplica gravidade na velocidade
-    this->velZ -= GRAVIDADE * t_d;
+    this->gVelZ -= GRAVIDADE * t_d;
 
     // Aplica velocidade na posição Z
-    this->gZ += this->velZ * t_d;
+    this->gZ += this->gVelZ * t_d;
 
     // Colisão com o chão
     if (this->gZ < 0.0f)
     {
         this->gZ = 0.0f;
-        this->velZ = 0.0f;
+        this->gVelZ= 0.0f;
     }
 }
 

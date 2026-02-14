@@ -12,9 +12,11 @@
 #include <string.h>
 #include <vector>
 
+
 #define DETALHE_ARENA 120
 #define DETALHE_OBSTACULO 36
 #define ALTURA_OBSTACULO ALTURA_MEMBROS*3
+#define ALTURA_ARENA 3*ALTURA_OBSTACULO
 
 struct Obstaculo
 {

@@ -36,12 +36,12 @@
 
 #define ALTURA_MEMBROS 10.0f
 
-#define GRAVIDADE 0.002f
-#define VELOCIDADE_PULO 0.6f
+#define GRAVIDADE 0.01f
+#define VELOCIDADE_PULO 1.0f
 
 class Jogador {
     GLfloat gX, gY, gZ;
-    GLfloat raio, velZ;
+    GLfloat raio, gVelZ;
     GLfloat gR, gG, gB;
     GLfloat animacao;
     GLfloat gTheta;
@@ -75,7 +75,7 @@ public:
         this->gThetaBraco = 0.0f;
         this->vidas = vidas;
         this->timerTiro = 0.0f;
-        this->velZ = 0.0f;
+        this->gVelZ = 0.0f;
     };
 
     void Desenha()
@@ -98,16 +98,18 @@ public:
     void RodaBraco(GLfloat d_theta_braco, GLfloat t_d);
     void RodaBracoMouse(GLfloat d_theta_braco, GLfloat theta_alvo, GLfloat t_d);
 
-    GLfloat X() { return this->gX; }
-    GLfloat Y() { return this->gY; }
-    GLfloat Z() { return this->gZ; }
-    GLfloat R() { return this->gR;  }
-    GLfloat G() { return this->gG;  }
-    GLfloat B() { return this->gB;  }
+    GLfloat X()    { return this->gX;    }
+    GLfloat Y()    { return this->gY;    }
+    GLfloat Z()    { return this->gZ;    }
+    GLfloat R()    { return this->gR;    }
+    GLfloat G()    { return this->gG;    }
+    GLfloat B()    { return this->gB;    }
+    GLfloat velZ() { return this->gVelZ; }
     void MoveX(GLfloat dX);
     void MoveY(GLfloat dX);
     void MoveZ(GLfloat dX);
     void Pula();
+    void Pousa(GLfloat z);
     void AtualizaFisica(GLfloat t_d);
 
     GLfloat EspessuraBraco();
