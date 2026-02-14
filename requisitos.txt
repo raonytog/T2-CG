@@ -1,20 +1,20 @@
 Item         | Sub-Item                 | Ponto | Feito
 -------------------------------------------------------
-Base do jogo | morrer, ganhar, mensagem |  1.0  | 
+Base do jogo | morrer, ganhar, mensagem |  1.0  | 1
 -------------------------------------------------------
              | movimento das pernas     |  1.0  | 0.25
-Jogador 3D   | braço e tiro             |  1.0  | 
+Jogador 3D   | braço e tiro             |  1.0  | 0.10
              | pulo e obstaculos        |  1.0  | 0.5
 -------------------------------------------------------
              | iluminacao               |  1.0  | 0.5
 Aparência    | lanterna                 |  1.0  | 
              | textura                  |  1.0  | 
 -------------------------------------------------------
-             | camera 1                 |  1.0  |
-Cameras      | camera 2                 |  1.0  |
+             | camera 1                 |  1.0  | 
+Cameras      | camera 2                 |  1.0  | 
              | visao do Jogador         |  1.0  | 1
 -------------------------------------------------------
-Bonus 1      | minimapa                 |  1.0  |
+Bonus 1      | minimapa                 |  1.0  | 
 -------------------------------------------------------
 Bonus 2      | modelos avancados        |  1.0  |
 -------------------------------------------------------

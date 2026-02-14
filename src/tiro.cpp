@@ -1,10 +1,10 @@
 #include "../includes/tiro.h"
 
-void Tiro::DesenhaTiro(GLfloat x, GLfloat y, GLfloat d_x, GLfloat d_y, GLfloat theta)
+void Tiro::DesenhaTiro(GLfloat x, GLfloat y, GLfloat z, GLfloat d_x, GLfloat d_y, GLfloat theta)
 {
     glPushMatrix();
 
-    glTranslatef(x, y, 0.0f);
+    glTranslatef(x, y, z);
     glRotatef(theta, 0.0f, 0.0f, 1.0f); 
 
     DesenhaRectCentrado(d_x, d_y, 1.0f, 1.0f, 1.0f);
@@ -26,6 +26,11 @@ GLfloat Tiro::X()
 GLfloat Tiro::Y()
 {
     return this->gY;
+}
+
+GLfloat Tiro::Z()
+{
+    return this->gZ;
 }
 
 int Tiro::IdJogador()

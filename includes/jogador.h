@@ -42,7 +42,7 @@
 class Jogador {
     GLfloat gX, gY, gZ;
     GLfloat raio, velZ;
-    GLfloat R, G, B;
+    GLfloat gR, gG, gB;
     GLfloat animacao;
     GLfloat gTheta;
     GLfloat gThetaBraco;
@@ -68,7 +68,7 @@ public:
             GLfloat R, GLfloat G, GLfloat B, GLfloat theta, int vidas)
     {
         this->gX = x;   this->gY = y;   this->gZ = z;
-        this->R = R;    this->G = G;    this->B = B;
+        this->gR = R;    this->gG = G;    this->gB = B;
         this->raio = raio;
         this->animacao = 0.0f;
         this->gTheta = theta;
@@ -80,15 +80,15 @@ public:
 
     void Desenha()
     { 
-        DesenhaJogador(gX, gY, gZ, raio, R, G, B, animacao, gTheta, gThetaBraco, vidas);
+        DesenhaJogador(gX, gY, gZ, raio, gR, gG, gB, animacao, gTheta, gThetaBraco, vidas);
     };
     void DesenhaParteSuperior()
     { 
-        DesenhaSuperior(gX, gY, gZ, raio, R, G, B, animacao, gTheta, gThetaBraco, vidas);
+        DesenhaSuperior(gX, gY, gZ, raio, gR, gG, gB, animacao, gTheta, gThetaBraco, vidas);
     };
     void DesenhaParteInferior()
     { 
-        DesenhaInferior(gX, gY, gZ, raio, R, G, B, animacao, gTheta, gThetaBraco, vidas);
+        DesenhaInferior(gX, gY, gZ, raio, gR, gG, gB, animacao, gTheta, gThetaBraco, vidas);
     };
 
     void Move(GLfloat dist, GLfloat t_d);
@@ -98,9 +98,12 @@ public:
     void RodaBraco(GLfloat d_theta_braco, GLfloat t_d);
     void RodaBracoMouse(GLfloat d_theta_braco, GLfloat theta_alvo, GLfloat t_d);
 
-    GLfloat X();
-    GLfloat Y();
-    GLfloat Z();
+    GLfloat X() { return this->gX; }
+    GLfloat Y() { return this->gY; }
+    GLfloat Z() { return this->gZ; }
+    GLfloat R() { return this->gR;  }
+    GLfloat G() { return this->gG;  }
+    GLfloat B() { return this->gB;  }
     void MoveX(GLfloat dX);
     void MoveY(GLfloat dX);
     void MoveZ(GLfloat dX);

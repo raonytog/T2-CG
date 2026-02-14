@@ -71,19 +71,22 @@ void DesenhaRectPos(GLfloat d_x, GLfloat d_y, GLfloat d_z, GLfloat R, GLfloat G,
 }
 
 void DesenhaCilindro(GLfloat radius, GLfloat z, GLfloat R, GLfloat G, GLfloat B, int detalhe) {
-    glColor3f(1,1,1);
+    glColor3f(R, G, B);
     glPointSize(1.0f);
     float angle;
 
     glBegin(GL_QUAD_STRIP);
     for (int i = 0; i <= detalhe; i++) {
         angle = i * M_PI * 2 / detalhe;
+        glNormal3f(cos(angle), sin(angle), 0.0f);
         glVertex3f(radius * cos(angle), radius * sin(angle), 0.0f);
         glVertex3f(radius * cos(angle), radius * sin(angle), z);
     }
     glEnd();
 
-    glBegin(GL_POLYGON); // fecha o cilindro
+    // fecha o cilindro
+    glBegin(GL_POLYGON);
+    glNormal3f(0.0f, 0.0f, 1.0f);
     for (int i = 0; i < detalhe; i++) {
         angle = i * PI * 2 / detalhe;
         glVertex3f(radius * cos(angle), radius * sin(angle), z);
@@ -97,7 +100,9 @@ void DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B, int detalhe)
     glPointSize(1.0f);
 
     glBegin(GL_TRIANGLE_FAN);
-        for (int i = 0; i < detalhe; i++) {
+        glNormal3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        for (int i = 0; i <= detalhe; i++) {
             glVertex3f(radius * cos(i * PI * 2 / detalhe), radius * sin(i * PI * 2 / detalhe), 0.0f);
         }
     glEnd();

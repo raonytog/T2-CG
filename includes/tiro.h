@@ -16,20 +16,17 @@
 #define TIRO_LARGURA 0.5f
 
 class Tiro {
-    GLfloat gX; 
-    GLfloat gY;
-    GLfloat dX;
-    GLfloat dY;
+    GLfloat gX, gY, gZ;
+    GLfloat dX, dY;
     GLfloat gTheta;
     int idJogador; // id do jogador que atirou
 private:
-    void DesenhaTiro(GLfloat x, GLfloat y, GLfloat d_x, GLfloat d_y, GLfloat theta);
+    void DesenhaTiro(GLfloat x, GLfloat y, GLfloat z, GLfloat d_x, GLfloat d_y, GLfloat theta);
 
 public:
-    Tiro(GLfloat x, GLfloat y, GLfloat tamanho, GLfloat theta, int id_jogador)
+    Tiro(GLfloat x, GLfloat y, GLfloat z, GLfloat tamanho, GLfloat theta, int id_jogador)
     {
-        this->gX = x; 
-        this->gY = y;
+        this->gX = x;   this->gY = y;   this->gZ = z;
         this->dX = tamanho * TIRO_COMPRIMENTO;
         this->dY = tamanho * TIRO_LARGURA;
         this->gTheta = theta;
@@ -38,13 +35,14 @@ public:
 
     void Desenha()
     { 
-        DesenhaTiro(gX, gY, dX, dY, gTheta);
+        DesenhaTiro(gX, gY, gZ, dX, dY, gTheta);
     };
 
     void Move(GLfloat dist, GLfloat t_d);
 
     GLfloat X();
     GLfloat Y();
+    GLfloat Z();
     int IdJogador();
 
     std::array<std::pair<GLfloat, GLfloat>, 4> Pontos();

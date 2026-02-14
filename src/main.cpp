@@ -28,6 +28,9 @@ using namespace tinyxml2;
 #define TAMANHO_CORACAO (GLfloat) 24
 #define DISTANCIA_CORACAO (GLfloat) 8 // distância entre um coração e outro e distância da borda
 
+#define CAM_POV 0
+#define CAM_GUN_POV 1
+#define CAM_3TH_POV 2
 //Key status
 int key_status[256];
 
@@ -46,9 +49,15 @@ const GLint viewing_height = 500;
 const GLint fov = 60;
 const GLfloat aspect_ratio = (GLfloat)viewing_width / (GLfloat)viewing_height;
 
-const GLfloat light_position[] = {0, 0, 600, 1};
+const GLfloat light_position[] = {400, 0, 400, 0.75};
 
-const GLfloat luz_ambiente[] = { 0.2f, 0.2f, 0.2f, 1.0f }; 
+GLfloat light_position_j_1[] = {0, 0, 0, 0.75};
+GLfloat light_difusa__j_1[] = {0, 0, 0, 0.75};
+
+GLfloat light_position_j_2[] = {0, 0, 0, 0.75};
+GLfloat light_difusa__j_2[] = {0, 0, 0, 0.75};
+
+// const GLfloat luz_ambiente[] = { 0.2f, 0.2f, 0.2f, 1.0f }; 
 const GLfloat luz_difusa[]   = { 0.7f, 0.7f, 0.7f, 1.0f };
 const GLfloat luz_especular[]= { 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -94,6 +103,31 @@ void MensagemDeVitoria(GLfloat x, GLfloat y)
         glutBitmapCharacter(font, *tmp_str);
         tmp_str++;
     }
+}
+
+void SetaLuzPersonagens(void)
+{
+    // luz do j1
+    light_position_j_1[0] = j_1->X();
+    light_position_j_1[1] = j_1->Y();
+    light_position_j_1[2] = j_1->Z();
+    light_position_j_1[3] = 0.75f;
+
+    light_difusa__j_1[0] = j_1->R();
+    light_difusa__j_1[1] = j_1->G();
+    light_difusa__j_1[2] = j_1->B();
+    light_difusa__j_1[3] = 1;
+
+    // luz do j2
+    light_position_j_2[0] = j_2->X();
+    light_position_j_2[2] = j_2->Y();
+    light_position_j_2[2] = j_2->Z();
+    light_position_j_2[3] = 0.75f;
+
+    light_difusa__j_1[0] = j_1->R();
+    light_difusa__j_1[1] = j_1->G();
+    light_difusa__j_1[2] = j_1->B();
+    light_difusa__j_1[3] = 1;
 }
 
 struct Circulo
@@ -152,7 +186,7 @@ std::vector<Circulo> LeSVG(const std::string& nome_arquivo) {
         }
         p_elemento = p_elemento->NextSiblingElement();
     }
-    
+
     return ret;
 }
 
@@ -262,7 +296,7 @@ void DrawAxes(double size) {
 
 // Em src/main.cpp
 
-void ConfiguraCameraJogador(Jogador* p) {
+void ConfiguraCameraJogador(Jogador* p, int cam) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(fov, aspect_ratio, 0.1, 2000);
@@ -319,24 +353,55 @@ void DesenhaHUD()
     glMatrixMode(GL_MODELVIEW);
 }
 
+void luzJogador(int qualJogador) {
+    if (qualJogador == 1) 
+    {
+        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+        glLightfv(GL_LIGHT1, GL_POSITION, light_position_j_1);
+        return;
+    }
+
+    if (qualJogador == 2)
+    {
+        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+        glLightfv(GL_LIGHT1, GL_POSITION, light_position_j_2);
+        return;
+    }
+}
+
+void renderPlayerScene(Jogador *p1, Jogador *p2) 
+{
+    if (key_status[(int) 'v'] == 0 || key_status[(int) 'b'] == 0) 
+    {
+        ConfiguraCameraJogador(p1, CAM_POV);
+
+        if (p1->R() == 1) luzJogador(1);
+        else if (p1->R() == 0) luzJogador(2);
+
+        arena->Desenha();
+        p1->Desenha();
+        p2->Desenha();
+    }
+
+    if (key_status[(int) 'v'] == 1 && key_status[(int) 'b'] == 0) 
+    {
+    }
+
+    if (key_status[(int) 'v'] == 0 && key_status[(int) 'b'] == 1) 
+    {
+    }
+}
+
 void renderScene(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // p1
     glViewport(0, 0, width/2, height);
-    ConfiguraCameraJogador(j_1);
-    arena->Desenha();
-    j_1->Desenha();
-    j_2->Desenha();
-
+    renderPlayerScene(j_1, j_2);
     // p2
     glViewport(width/2, 0, width/2, height);
-    ConfiguraCameraJogador(j_2);
-
-    arena->Desenha();
-    j_1->Desenha();
-    j_2->Desenha();
+    renderPlayerScene(j_2, j_1);
 
     DesenhaHUD();
     if (estado > 0) MensagemDeVitoria(0, 0);
@@ -354,14 +419,8 @@ void resetKeyStatus()
 void reset()
 {
     // procura os valores iniciais dos jogadores
-    float x_1 = 0.0f;
-    float y_1 = 0.0f;
-    float z_1 = 0.0f;
-    float r_1 = 0.0f;
-    float x_2 = 0.0f;
-    float y_2 = 0.0f;
-    float z_2 = 0.0f;
-    float r_2 = 0.0f;
+    float x_1 = 0.0f, y_1 = 0.0f, z_1 = 0.0f, r_1 = 0.0f;
+    float x_2 = 0.0f, y_2 = 0.0f, z_2 = 0.0f, r_2 = 0.0f;
 
     for (auto& c : circulos) {
         if (c.cor == "red")
@@ -482,11 +541,17 @@ void keyPress(unsigned char key, int x, int y)
         case '.':
             key_status[(int) '.'] = 1;
             break;
-        case '1':
+        case '1': //debug -> perde vida do p1
             key_status[(int) '1'] = 1;
             break;
-        case '2':
+        case '2': //debug -> perde vida do p2
             key_status[(int) '2'] = 1;
+            break;
+        case 'v': //camera a cima da arma
+            key_status[(int) 'v'] = 1;
+            break;
+        case 'b': // terceira pesssoa com incremento/decremento de zoom com + ou -
+            key_status[(int) 'b'] = 1;
             break;
     }
     glutPostRedisplay();
@@ -509,10 +574,11 @@ void mouseClick(int button, int state, int x, int y) {
         {
             GLfloat tiro_x = j_1->XPontaBraco();
             GLfloat tiro_y = j_1->YPontaBraco();
+            GLfloat tiro_z = j_1->Altura(); // NAO Ẽ ISSO
             GLfloat tiro_tamanho = j_1->EspessuraBraco();
             GLfloat tiro_theta = j_1->ThetaBraco();
 
-            tiros.emplace_back(tiro_x, tiro_y, tiro_tamanho, tiro_theta, 1);
+            tiros.emplace_back(tiro_x, tiro_y, tiro_z, tiro_tamanho, tiro_theta, 1);
 
             j_1->ResetaTimer();
         }
@@ -620,10 +686,11 @@ void idle(void)
         {
             GLfloat tiro_x = j_2->XPontaBraco();
             GLfloat tiro_y = j_2->YPontaBraco();
+            GLfloat tiro_z = j_2->Altura();
             GLfloat tiro_tamanho = j_2->EspessuraBraco();
             GLfloat tiro_theta = j_2->ThetaBraco();
 
-            tiros.emplace_back(tiro_x, tiro_y, tiro_tamanho, tiro_theta, 2);
+            tiros.emplace_back(tiro_x, tiro_y, tiro_z, tiro_tamanho, tiro_theta, 2);
 
             j_2->ResetaTimer();
         }
@@ -654,10 +721,8 @@ void idle(void)
     GLfloat theta_mouse = atan2(mouse_Y - j_1->YBaseBraco(), mouse_x - j_1->XBaseBraco()) * 180.0 / PI;
     j_1->RodaBracoMouse(OMEGA_BRACO, theta_mouse, d_t);
 
-    if (key_status[(int) '4']) {
-        if (!key_status[(int) '6']) j_2->RodaBraco(OMEGA_BRACO, d_t);
-    }
-    else if (key_status[(int) '6']) j_2->RodaBraco(-OMEGA_BRACO, d_t);
+    if (key_status[(int) '4']) { if (!key_status[(int) '6']) j_2->RodaBraco(OMEGA_BRACO, d_t); }
+    else if (key_status[(int) '6']) { j_2->RodaBraco(-OMEGA_BRACO, d_t); }
 
     if (animacao_tras_1) j_1->Animacao(-V_JOGADOR, d_t);
     else if (animacao_frente_1) j_1->Animacao(V_JOGADOR, d_t);
@@ -696,15 +761,15 @@ void init()
     glShadeModel (GL_SMOOTH);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHT1);
     glEnable(GL_DEPTH_TEST);
 
     
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-    
     glEnable(GL_NORMALIZE);
 
-    glLightfv(GL_LIGHT0, GL_AMBIENT, luz_ambiente);
+    // glLightfv(GL_LIGHT0, GL_AMBIENT, luz_ambiente);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_difusa);
     glLightfv(GL_LIGHT0, GL_SPECULAR, luz_especular);
  
@@ -770,6 +835,9 @@ void inicializaObjetos()
     // com o braço em direção ao jogador 2
     mouse_x = j_2->X();
     mouse_Y = j_2->Y();
+
+    // seta as luzes dos personagens 
+    SetaLuzPersonagens();
 }
  
 int main(int argc, char *argv[])

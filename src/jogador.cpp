@@ -171,21 +171,6 @@ void Jogador::RodaBracoMouse(GLfloat d_theta_braco, GLfloat theta_alvo, GLfloat 
     }
 }
 
-GLfloat Jogador::X()
-{
-    return this->gX;
-}
-
-GLfloat Jogador::Y()
-{
-    return this->gY;
-}
-
-GLfloat Jogador::Z()
-{
-    return this->gZ;
-}
-
 void Jogador::MoveX(GLfloat dX)
 {
     this->gX += dX;
