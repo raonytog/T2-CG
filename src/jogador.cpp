@@ -61,7 +61,7 @@ void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat z, GLfloat unidade,
 {
     glPushMatrix();
 
-    glTranslatef(x, y, 0.0f);
+    glTranslatef(x, y, z);
 
     if (vidas > 0)
     {
@@ -83,6 +83,30 @@ void Jogador::Move(GLfloat dist, GLfloat t_d)
 {
     this->gX += dist * t_d * cos(this->gTheta * PI / 180);
     this->gY += dist * t_d * sin(this->gTheta * PI / 180);
+}
+
+void Jogador::Pula() 
+{
+    if (this->gZ == 0.0f) 
+    {
+        this->velZ = VELOCIDADE_PULO;
+    }
+}
+
+void Jogador::AtualizaFisica(GLfloat t_d)
+{
+    // Aplica gravidade na velocidade
+    this->velZ -= GRAVIDADE * t_d;
+
+    // Aplica velocidade na posição Z
+    this->gZ += this->velZ * t_d;
+
+    // Colisão com o chão
+    if (this->gZ < 0.0f)
+    {
+        this->gZ = 0.0f;
+        this->velZ = 0.0f;
+    }
 }
 
 void Jogador::Roda(GLfloat d_theta, GLfloat t_d)
@@ -157,6 +181,11 @@ GLfloat Jogador::Y()
     return this->gY;
 }
 
+GLfloat Jogador::Z()
+{
+    return this->gZ;
+}
+
 void Jogador::MoveX(GLfloat dX)
 {
     this->gX += dX;
@@ -207,6 +236,11 @@ GLfloat Jogador::Theta()
 GLfloat Jogador::ThetaBraco()
 {
     return normalizaAnguloGraus(this->gTheta + this->gThetaBraco);
+}
+
+GLfloat Jogador::Altura()
+{
+    return ALTURA_MEMBROS*3;
 }
 
 int Jogador::Vidas()

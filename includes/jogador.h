@@ -36,9 +36,12 @@
 
 #define ALTURA_MEMBROS 10.0f
 
+#define GRAVIDADE 0.002f
+#define VELOCIDADE_PULO 0.6f
+
 class Jogador {
     GLfloat gX, gY, gZ;
-    GLfloat raio;
+    GLfloat raio, velZ;
     GLfloat R, G, B;
     GLfloat animacao;
     GLfloat gTheta;
@@ -64,18 +67,15 @@ public:
     Jogador(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
             GLfloat R, GLfloat G, GLfloat B, GLfloat theta, int vidas)
     {
-        this->gX = x; 
-        this->gY = y;
-        this->gZ = z;
+        this->gX = x;   this->gY = y;   this->gZ = z;
+        this->R = R;    this->G = G;    this->B = B;
         this->raio = raio;
-        this->R = R;
-        this->G = G;
-        this->B = B;
         this->animacao = 0.0f;
         this->gTheta = theta;
         this->gThetaBraco = 0.0f;
         this->vidas = vidas;
         this->timerTiro = 0.0f;
+        this->velZ = 0.0f;
     };
 
     void Desenha()
@@ -100,9 +100,12 @@ public:
 
     GLfloat X();
     GLfloat Y();
+    GLfloat Z();
     void MoveX(GLfloat dX);
     void MoveY(GLfloat dX);
     void MoveZ(GLfloat dX);
+    void Pula();
+    void AtualizaFisica(GLfloat t_d);
 
     GLfloat EspessuraBraco();
     GLfloat RaioColisao();
@@ -113,6 +116,7 @@ public:
     GLfloat YPontaBraco();
     GLfloat Theta();
     GLfloat ThetaBraco();
+    GLfloat Altura();
     int Vidas();
 
     bool PodeAtirar();

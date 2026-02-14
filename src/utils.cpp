@@ -176,3 +176,8 @@ void DesenhaCoracao(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B, i
         }
     glEnd();
 }
+
+void debug() 
+{
+    printf("--> debug\n");
+}

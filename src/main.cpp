@@ -272,7 +272,7 @@ void ConfiguraCameraJogador(Jogador* p) {
     // 1. Posição do Olho (Câmera)
     float eyeX = p->X() + p->RaioColisao();
     float eyeY = p->Y();
-    float eyeZ = ALTURA_MEMBROS * 2.5f;
+    float eyeZ = p->Z() + ALTURA_MEMBROS * 2.5f;
 
     float theta_rad = p->Theta() * M_PI / 180.0f;
 
@@ -446,6 +446,11 @@ void keyPress(unsigned char key, int x, int y)
             break;
         case 27:
             estado = -1;
+        case 'x':
+            key_status[(int) 'x'] = 1;
+            break;
+        case '.':
+            key_status[(int) '.'] = 1;
             break;
     }
     glutPostRedisplay();
@@ -499,8 +504,7 @@ void idle(void)
         quit();
         exit(0);
     }
-    else if (estado > 0)
-        return;
+    else if (estado > 0) return;
 
     // encontrei um problema ao rodar o código em casa onde a cada minuto,
     // mais ou menos, o d_t dá um salto enorme (>1000) e faz com que
@@ -508,10 +512,8 @@ void idle(void)
     // não encontrei esse problema no labgrad, então imagino que seja algum problema
     // específico do wsl. então estou botando essa linha de código aqui
     // pra evitar esse problema
-    if (d_t > 10.0f)
-        d_t = 10.0f;
-    else if (d_t < 0.0f)
-        d_t = 0.0f;
+    if (d_t > 10.0f) d_t = 10.0f;
+    else if (d_t < 0.0f) d_t = 0.0f;
 
     // bools que controlam a animação dos jogadores
     // caso os jogadores estejam se movimentando pra frente, trás ou girando
@@ -521,8 +523,7 @@ void idle(void)
     bool animacao_frente_2 = false;
     bool animacao_tras_2 = false;
 
-    if (key_status[(int) 'a'])
-    {
+    if (key_status[(int) 'a']) {
         if (!key_status[(int) 'd'])
         {
             animacao_frente_1 = true;
@@ -592,38 +593,39 @@ void idle(void)
         }
     }
 
-    for (auto& tiro : tiros)
+    if (key_status[(int) 'x'])
     {
-        tiro.Move(V_TIRO, d_t);
+        j_1->Pula();
     }
+
+    if (key_status[(int) 'o']) 
+    {
+        j_2->Pula();
+    }
+
+    for (auto& tiro : tiros) { tiro.Move(V_TIRO, d_t); }
 
     GLfloat theta_mouse = atan2(mouse_Y - j_1->YBaseBraco(), mouse_x - j_1->XBaseBraco()) * 180.0 / PI;
     j_1->RodaBracoMouse(OMEGA_BRACO, theta_mouse, d_t);
 
-    if (key_status[(int) '4'])
-    {
-        if (!key_status[(int) '6'])
-            j_2->RodaBraco(OMEGA_BRACO, d_t);
+    if (key_status[(int) '4']) {
+        if (!key_status[(int) '6']) j_2->RodaBraco(OMEGA_BRACO, d_t);
     }
-    else if (key_status[(int) '6'])
-        j_2->RodaBraco(-OMEGA_BRACO, d_t);
+    else if (key_status[(int) '6']) j_2->RodaBraco(-OMEGA_BRACO, d_t);
 
-    if (animacao_tras_1)
-        j_1->Animacao(-V_JOGADOR, d_t);
-    else if (animacao_frente_1)
-        j_1->Animacao(V_JOGADOR, d_t);
-    else
-        j_1->AnimacaoReset(V_JOGADOR, d_t);
+    if (animacao_tras_1) j_1->Animacao(-V_JOGADOR, d_t);
+    else if (animacao_frente_1) j_1->Animacao(V_JOGADOR, d_t);
+    else j_1->AnimacaoReset(V_JOGADOR, d_t);
     
-    if (animacao_tras_2)
-        j_2->Animacao(-V_JOGADOR, d_t);
-    else if (animacao_frente_2)
-        j_2->Animacao(V_JOGADOR, d_t);
-    else
-        j_2->AnimacaoReset(V_JOGADOR, d_t);
+    if (animacao_tras_2) j_2->Animacao(-V_JOGADOR, d_t);
+    else if (animacao_frente_2) j_2->Animacao(V_JOGADOR, d_t);
+    else j_2->AnimacaoReset(V_JOGADOR, d_t);
 
     j_1->DecrementaTimer(d_t);
+    j_1->AtualizaFisica(1);
+
     j_2->DecrementaTimer(d_t);
+    j_2->AtualizaFisica(1);
 
     arena->colisaoJogador(j_1, j_2);
 
@@ -632,14 +634,11 @@ void idle(void)
     int vidas_1 = j_1->colisaoTiro(tiros, 1);
     int vidas_2 = j_2->colisaoTiro(tiros, 2);
 
-    if (vidas_1 == 0)
-    {
-        if (vidas_2 == 0)
-            estado = 3;
-        else
-            estado = 2;
-    } else if (vidas_2 == 0)
-        estado = 1;
+    if (vidas_1 == 0) {
+        if (vidas_2 == 0) estado = 3;
+        else estado = 2;
+
+    } else if (vidas_2 == 0) estado = 1;
     
     glutPostRedisplay();
 }
@@ -700,31 +699,13 @@ void inicializaObjetos()
     }
 
     // procura os valores iniciais dos jogadores
-    float x_1 = 0.0f;
-    float y_1 = 0.0f;
-    float z_1 = 0.0f;
-    float r_1 = 0.0f;
-    float x_2 = 0.0f;
-    float y_2 = 0.0f;
-    float z_2 = 0.0f;
-    float r_2 = 0.0f;
+    float x_1 = 0.0f, y_1 = 0.0f, z_1 = 0.0f, r_1 = 0.0f;
+    float x_2 = 0.0f, y_2 = 0.0f, z_2 = 0.0f, r_2 = 0.0f;
 
     for (auto& c : circulos) {
-        if (c.cor == "red")
-        {
-            x_1 = c.x;
-            y_1 = c.y;
-            r_1 = c.raio;
-        }
-        if (c.cor == "green")
-        {
-            x_2 = c.x;
-            y_2 = c.y;
-            r_2 = c.raio;
-        }
-
-        if (r_1 > 0 && r_2 > 0)
-            break;
+        if (c.cor == "red")   { x_1 = c.x;  y_1 = c.y;  r_1 = c.raio; }
+        if (c.cor == "green") { x_2 = c.x;  y_2 = c.y;  r_2 = c.raio; }
+        if (r_1 > 0 && r_2 > 0) break;
     }
 
     // ângulo inicial dos jogadores
@@ -736,10 +717,7 @@ void inicializaObjetos()
     j_2 = new Jogador(x_2, y_2, z_2, r_2, 0.0f, 1.0f, 0.0f, theta_2, 3);
 
     for (auto& c : circulos) {
-        if (c.cor == "black")
-        {
-            arena->adicionaObstaculo(c.x, c.y, 0, c.raio);
-        }
+        if (c.cor == "black") { arena->adicionaObstaculo(c.x, c.y, 0, c.raio); }
     }
 
     // inicia o jogo com o jogador 1 (controlado pelo mouse)

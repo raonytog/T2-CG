@@ -5,6 +5,8 @@
 #include <GL/glu.h>
 #include <GL/glut.h>
 
+#include <iostream>
+
 #include <math.h>
 
 #define ARENA 120
@@ -25,5 +27,7 @@ void DesenhaCilindro(GLfloat radius, GLfloat z, GLfloat R, GLfloat G, GLfloat B,
 void DesenhaElipse(GLfloat r_x, GLfloat r_y, GLfloat R, GLfloat G, GLfloat B, int detalhe);
 void DesenhaXis(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B);
 void DesenhaCoracao(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B, int detalhe);
+
+void debug();
 
 #endif /* FORMAS_H */
