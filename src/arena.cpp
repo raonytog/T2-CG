@@ -83,63 +83,38 @@ void Arena::colisaoJogador(Jogador *j_1, Jogador *j_2)
     }
 
     // trata colisão com os obstáculos
+    Jogador *jogadores[2] = {j_1, j_2};
     for (auto& obst : this->obstaculos)
     {
-        // ================= JOGADOR 1 =================
-        GLfloat dist_x_1 = j_1->X() - obst.x;
-        GLfloat dist_y_1 = j_1->Y() - obst.y;
-        GLfloat dist_1 = sqrt(pow(dist_x_1, 2.0f) + pow(dist_y_1, 2.0f));
-        GLfloat dist_min_1 = j_1->RaioColisao() + obst.raio;
-
-        if (dist_1 < dist_min_1)
+        for (Jogador *j : jogadores)
         {
-            // Lógica 3D:
-            // 1. Se já está totalmente acima, ignora (passa voando)
-            // 2. Se está caindo (velZ <= 0) e os pés estão próximos ao topo (margem de 5.0f), pousa.
-            // 3. Caso contrário, é parede.
-            
-            bool pousou = false;
+            GLfloat dist_x_1 = j->X() - obst.x;
+            GLfloat dist_y_1 = j->Y() - obst.y;
+            GLfloat dist_1 = sqrt(pow(dist_x_1, 2.0f) + pow(dist_y_1, 2.0f));
+            GLfloat dist_min_1 = j->RaioColisao() + obst.raio;
 
-            if (j_1->Z() >= ALTURA_OBSTACULO) {
+            if (dist_1 < dist_min_1)
+            {
+                // 1. Se já está totalmente acima, ignora (passa voando)
+                // 2. Se está caindo (velZ <= 0) e os pés estão próximos ao topo (margem de 5.0f), pousa.
+                // 3. Caso contrário, é parede.
+                
+                bool pousou = false;
+
                 // Está voando acima do obstáculo
-                pousou = true; 
-            }
-            else if (j_1->velZ() <= 0.0f && j_1->Z() > ALTURA_OBSTACULO - 5.0f) {
-                // Caindo e atingiu a borda superior -> Pousa
-                j_1->Pousa(ALTURA_OBSTACULO);
-                pousou = true;
-            }
+                if (j->Z() >= ALTURA_OBSTACULO) { pousou = true; }
+                else if (j->velZ() <= 0.0f && j->Z() > ALTURA_OBSTACULO - 5.0f) {
+                    // Caindo e atingiu a borda superior -> Pousa
+                    j->Pousa(ALTURA_OBSTACULO);
+                    pousou = true;
+                }
 
-            // Se não pousou/não está em cima, é colisão lateral (parede)
-            if (!pousou)
-            {
-                GLfloat ajuste = dist_min_1 - dist_1;
-                v_1.push_back({ajuste * dist_x_1 / dist_1, ajuste * dist_y_1 / dist_1});
-            }
-        }
-
-        // ================= JOGADOR 2 =================
-        GLfloat dist_x_2 = j_2->X() - obst.x;
-        GLfloat dist_y_2 = j_2->Y() - obst.y;
-        GLfloat dist_2 = sqrt(pow(dist_x_2, 2.0f) + pow(dist_y_2, 2.0f));
-        GLfloat dist_min_2 = j_2->RaioColisao() + obst.raio;
-
-        if (dist_2 < dist_min_2)
-        {
-            bool pousou = false;
-
-            if (j_2->Z() >= ALTURA_OBSTACULO) {
-                pousou = true;
-            }
-            else if (j_2->velZ() <= 0.0f && j_2->Z() > ALTURA_OBSTACULO - 5.0f) {
-                j_2->Pousa(ALTURA_OBSTACULO);
-                pousou = true;
-            }
-
-            if (!pousou)
-            {
-                GLfloat ajuste = dist_min_2 - dist_2;
-                v_2.push_back({ajuste * dist_x_2 / dist_2, ajuste * dist_y_2 / dist_2});
+                // Se não pousou/não está em cima, é colisão lateral (parede)
+                if (!pousou)
+                {
+                    GLfloat ajuste = dist_min_1 - dist_1;
+                    v_1.push_back({ajuste * dist_x_1 / dist_1, ajuste * dist_y_1 / dist_1});
+                }
             }
         }
     }
