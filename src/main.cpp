@@ -69,6 +69,10 @@ Jogador *j_2 = nullptr;
 
 std::vector<Tiro> tiros;
 
+// Textura de fundo
+GLuint BACKGROUND_TEXTURE = 0;
+GLuint FLOOR_TEXTURE = 0;
+
 int estado = 0;
 // -1 para quit
 // 0 se o jogo ainda está ocorrendo,
@@ -219,25 +223,16 @@ void DesenhaCoracoes(int vidas_1, int vidas_2)
     }
 }
 
-// Coloca a câmera atrás do jogador e olhando para ele
 void PosicionaCamera(Jogador* p) {
-    // Pegamos a posição e o ângulo do jogador
     float x = p->X();
     float y = p->Y();
     float r = p->RaioColisao();
-    // Assumindo que o ângulo no seu Jogador está em graus e precisa converter para radianos
-    // Se já tiver getter para radianos, use-o.
-    // O deslocamento -50 coloca a câmera "atrás" (ajuste conforme a escala do seu mundo)
+
     float dist_camera = 50.0f; 
     float altura_camera = 30.0f;
     float theta_rad = p->Theta() * M_PI / 180.0f; 
 
     // Posição do Olho (Câmera)
-    // Calcula x/y atrás do jogador baseado no ângulo
-    // float cam_x = x - dist_camera * cos(theta_rad);
-    // float cam_y = y - dist_camera * sin(theta_rad);
-    // float cam_z = altura_camera; // Altura da câmera (Z é up)
-
     float cam_x = x;
     float cam_y = y;
     float cam_z = ALTURA_MEMBROS*3;
@@ -247,54 +242,10 @@ void PosicionaCamera(Jogador* p) {
     float look_y = y;
     float look_z = 0.0f; // Olha para o chão/centro do boneco
 
-    // Vetor Up (Onde fica o "céu")
-    // Como estamos em um mundo 2D virando 3D, geralmente Z é o Up
     gluLookAt(cam_x, cam_y, cam_z,  // Eye
               look_x, look_y, look_z,  // Center
               0.0f, 0.0f, 1.0f);       // Up
 }
-
-void DrawAxes(double size) {
-    GLfloat mat_ambient_r[] = { 1.0, 0.0, 0.0, 1.0 };
-    GLfloat mat_ambient_g[] = { 0.0, 1.0, 0.0, 1.0 };
-    GLfloat mat_ambient_b[] = { 0.0, 0.0, 1.0, 1.0 };
-    GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
-
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, no_mat);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, no_mat);
-    glMaterialfv(GL_FRONT, GL_SHININESS, no_mat);
-
-    //x axis red
-    glPushMatrix();
-        glMaterialfv(GL_FRONT, GL_EMISSION, mat_ambient_r);
-        glColor3fv(mat_ambient_r);
-        glScalef(size, size*0.1, size*0.1);
-        glTranslatef(0.5, 0, 0); // put in one end
-        glutSolidCube(1.0);
-    glPopMatrix();
-
-    //y axis green
-    glPushMatrix();
-        glMaterialfv(GL_FRONT, GL_EMISSION,  mat_ambient_g);
-        glColor3fv(mat_ambient_g);
-        glRotatef(90,0,0,1);
-        glScalef(size, size*0.1, size*0.1);
-        glTranslatef(0.5, 0, 0); // put in one end
-        glutSolidCube(1.0);
-    glPopMatrix();
-
-    //z axis blue
-    glPushMatrix();
-        glMaterialfv(GL_FRONT, GL_EMISSION, mat_ambient_b);
-        glColor3fv(mat_ambient_b);
-        glRotatef(-90,0,1,0);
-        glScalef(size, size*0.1, size*0.1);
-        glTranslatef(0.5, 0, 0); // put in one end
-        glutSolidCube(1.0);
-    glPopMatrix();
-}
-
-// Em src/main.cpp
 
 void ConfiguraCameraJogador(Jogador* p, int cam) {
     glMatrixMode(GL_PROJECTION);
@@ -378,7 +329,7 @@ void renderPlayerScene(Jogador *p1, Jogador *p2)
         if (p1->R() == 1) luzJogador(1);
         else if (p1->R() == 0) luzJogador(2);
 
-        arena->Desenha();
+        arena->Desenha(FLOOR_TEXTURE);
         p1->Desenha();
         p2->Desenha();
     }
@@ -392,9 +343,59 @@ void renderPlayerScene(Jogador *p1, Jogador *p2)
     }
 }
 
+void DesenhaFundo() 
+{
+    // Garante que desenha na tela toda
+    glViewport(0, 0, width, height);
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, width, 0, height);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // Desabilita luz e profundidade para desenhar o fundo 2D
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, BACKGROUND_TEXTURE);
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    float repeticao_y = 1.0f;
+    
+    // Calcula quantas vezes a textura cabe na largura da tela mantendo a proporção original.
+    float ratio_tela = (float)width / height;
+    float repeticao_x = repeticao_y * ratio_tela;
+
+    glBegin(GL_QUADS);
+        // Mapeia de 0 a repeticao_x na horizontal (repetição sequencial)
+        // Mapeia de 0 a 1.0 na vertical (sem repetição vertical)
+        glTexCoord2f(0.0f, 0.0f);               glVertex2f(0.0f, 0.0f);
+        glTexCoord2f(repeticao_x, 0.0f);        glVertex2f(width, 0.0f);
+        glTexCoord2f(repeticao_x, 1.0f);        glVertex2f(width, height);
+        glTexCoord2f(0.0f, repeticao_y);        glVertex2f(0.0f, height);
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+}
+
 void renderScene(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Desenha o fundo antes de tudo
+    DesenhaFundo();
 
     // p1
     glViewport(0, 0, width/2, height);
@@ -782,6 +783,9 @@ void init()
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
+    BACKGROUND_TEXTURE = CarregaTextura("textures/background.png");
+    FLOOR_TEXTURE = CarregaTextura("textures/floor.jpg");
 }
 
 // inicializa arena e jogadores

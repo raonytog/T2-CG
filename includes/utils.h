@@ -22,12 +22,13 @@ void DesenhaRectCentrado(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat
 void DesenhaRectXPos(GLfloat d_x, GLfloat d_y, GLfloat d_z, GLfloat R, GLfloat G, GLfloat B);
 void DesenhaRectYPos(GLfloat d_x, GLfloat d_y, GLfloat d_z,  GLfloat R, GLfloat G, GLfloat B);
 void DesenhaRectPos(GLfloat d_x, GLfloat d_y, GLfloat d_z,  GLfloat R, GLfloat G, GLfloat B);
-void DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B, int detalhe);
-void DesenhaCilindro(GLfloat radius, GLfloat z, GLfloat R, GLfloat G, GLfloat B, int detalhe);
+void DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B, int detalhe, GLuint textureID);
+void DesenhaCilindro(GLfloat radius, GLfloat z, GLfloat R, GLfloat G, GLfloat B, int detalhe, GLuint textureID);
 void DesenhaElipse(GLfloat r_x, GLfloat r_y, GLfloat R, GLfloat G, GLfloat B, int detalhe);
 void DesenhaXis(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B);
 void DesenhaCoracao(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B, int detalhe);
 
+GLuint CarregaTextura(const char* nomeArquivo);
 void debug();
 
 #endif /* FORMAS_H */

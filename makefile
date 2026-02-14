@@ -15,6 +15,8 @@ all: src/*.cpp includes/*.h
 	$(CXX) -o trabalhocg src/$(TARGET).cpp $(LINKING)
 
 run:
+	make clean
+	clear
 	make
 	./trabalhocg $(ARENA)
 

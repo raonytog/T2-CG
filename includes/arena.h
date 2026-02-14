@@ -29,7 +29,7 @@ class Arena {
     std::vector<Obstaculo> obstaculos;
 private:
     void DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
-                      GLfloat R, GLfloat G, GLfloat B);
+                      GLfloat R, GLfloat G, GLfloat B, GLuint textureID);
 
 public:
     friend class Jogador;
@@ -40,9 +40,9 @@ public:
         this->R = R;    this->G = G;    this->B = B;
         this->raio = raio;
     };
-    void Desenha()
+    void Desenha(GLuint textureID)
     { 
-        DesenhaArena(gX, gY, gZ, raio, R, G, B);
+        DesenhaArena(gX, gY, gZ, raio, R, G, B, textureID);
     };
 
     void adicionaObstaculo(float x, float y, float z, float r)

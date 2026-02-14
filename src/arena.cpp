@@ -1,18 +1,20 @@
 #include "../includes/arena.h"
 
 void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
-                         GLfloat R, GLfloat G, GLfloat B)
+                         GLfloat R, GLfloat G, GLfloat B, GLuint textureID)
 {
+    // desenha a superficie do chao
     glPushMatrix();
         glTranslatef(x, y, z);
-        DesenhaCirc(raio, R, G, B, DETALHE_ARENA);
+        DesenhaCirc(raio, R, G, B, DETALHE_ARENA, textureID);
     glPopMatrix();
 
+    // desenha os obstaculos
     for (auto& obst : this->obstaculos)
     {
         glPushMatrix();
             glTranslatef(obst.x, obst.y, 0);
-            DesenhaCilindro(obst.raio, ALTURA_OBSTACULO, 1,1,1, DETALHE_OBSTACULO);
+            DesenhaCilindro(obst.raio, ALTURA_OBSTACULO, 1,1,1, DETALHE_OBSTACULO, 0);
         glPopMatrix();
     }
 }
