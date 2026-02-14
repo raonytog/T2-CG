@@ -709,11 +709,13 @@ void idle(void)
     if (key_status[(int) '1'])
     {
         j_1->DecrementaVida();
+        key_status[(int) '1'] = 0;
     }
 
     if (key_status[(int) '2'])
     {
         j_2->DecrementaVida();
+        key_status[(int) '2'] = 0;
     }
 
     for (auto& tiro : tiros) { tiro.Move(V_TIRO, d_t); }
