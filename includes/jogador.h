@@ -119,6 +119,7 @@ public:
     GLfloat Altura();
     int Vidas();
 
+    void DecrementaVida();
     bool PodeAtirar();
     void DecrementaTimer(GLfloat d_t);
     void ResetaTimer();

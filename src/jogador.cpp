@@ -248,6 +248,10 @@ int Jogador::Vidas()
     return this->vidas;
 }
 
+void Jogador::DecrementaVida() {
+    this->vidas--;
+}
+
 bool Jogador::PodeAtirar()
 {
     return this->timerTiro == 0.0f;

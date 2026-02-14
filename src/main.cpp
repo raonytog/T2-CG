@@ -482,6 +482,12 @@ void keyPress(unsigned char key, int x, int y)
         case '.':
             key_status[(int) '.'] = 1;
             break;
+        case '1':
+            key_status[(int) '1'] = 1;
+            break;
+        case '2':
+            key_status[(int) '2'] = 1;
+            break;
     }
     glutPostRedisplay();
 }
@@ -631,6 +637,16 @@ void idle(void)
     if (key_status[(int) 'o']) 
     {
         j_2->Pula();
+    }
+
+    if (key_status[(int) '1'])
+    {
+        j_1->DecrementaVida();
+    }
+
+    if (key_status[(int) '2'])
+    {
+        j_2->DecrementaVida();
     }
 
     for (auto& tiro : tiros) { tiro.Move(V_TIRO, d_t); }
