@@ -161,6 +161,7 @@ void DesenhaMiniMapa(Jogador *j1, Jogador *j2, int side) {
             glDisable(GL_TEXTURE_2D);
             glDisable(GL_DEPTH_TEST);
 
+            // edges da arena
             glColor3f(1.0f, 1.0f, 1.0f);
             glBegin(GL_LINE_LOOP);
                 for (int i = 0; i < 360; i++) {
@@ -169,27 +170,52 @@ void DesenhaMiniMapa(Jogador *j1, Jogador *j2, int side) {
                 }
             glEnd();
 
+            // obstaculos
             glColor3f(0.0f, 0.0f, 0.0f);
-            glPointSize(8.0f);
-            for (Obstaculo o : arena->getObstaculosVector())
+            for (const auto& o : arena->getObstaculosVector())
             {
-                glBegin(GL_POINTS);
-                    glVertex2f(o.x, o.y);
+                glPushMatrix();
+                glTranslatef(o.x, o.y, 0.0f); 
+
+                glBegin(GL_TRIANGLE_FAN);
+                    glVertex2f(0.0f, 0.0f);
+                    for (int i = 0; i <= 360; i += 10) {
+                        float theta = i * M_PI / 180.0f;
+                        glVertex2f(o.raio * cos(theta), o.raio * sin(theta));
+                    }
                 glEnd();
+                glPopMatrix();
             }
 
-            // j_1 verde
+            // j_1
             glColor3f(0.0f, 1.0f, 0.0f);
-            glPointSize(5.0f); // Ponto grande
-            glBegin(GL_POINTS);
-                    glVertex2f(j1->X(), j1->Y());
-            glEnd();
+            glPushMatrix();
+            glTranslatef(j_1->X(), j_1->Y(), 0.0f);
 
-            // j_2 vermelho
-            glColor3f(1.0f, 0.0f, 0.0f);
-            glBegin(GL_POINTS);
-                glVertex2f(j2->X(), j2->Y());
+            glBegin(GL_TRIANGLE_FAN);
+                glVertex2f(0.0f, 0.0f);
+                for (int i = 0; i <= 360; i += 10) {
+                        float theta = i * M_PI / 180.0f;
+                        // Use j_1->RaioColisao() ou j_1->R() dependendo da sua classe
+                        glVertex2f(j_1->RaioColisao() * cos(theta), j_1->RaioColisao() * sin(theta));
+                }
             glEnd();
+            glPopMatrix();
+
+            // j_2
+            glColor3f(1.0f, 0.0f, 0.0f);
+            glPushMatrix();
+            glTranslatef(j_2->X(), j_2->Y(), 0.0f); 
+
+            glBegin(GL_TRIANGLE_FAN);
+                glVertex2f(0.0f, 0.0f);
+                for (int i = 0; i <= 360; i += 10) {
+                        float theta = i * M_PI / 180.0f;
+                        // Corrigido: Usando j_2 em vez de j_1
+                        glVertex2f(j_2->RaioColisao() * cos(theta), j_2->RaioColisao() * sin(theta));
+                }
+            glEnd();
+            glPopMatrix();
             
             if (lighting_enabled) glEnable(GL_LIGHTING);
             glEnable(GL_DEPTH_TEST);
