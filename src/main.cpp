@@ -26,7 +26,10 @@ using namespace tinyxml2;
 
 #define DETALHE_CORACAO 18
 #define TAMANHO_CORACAO (GLfloat) 24
-#define DISTANCIA_CORACAO (GLfloat) 8 
+#define DISTANCIA_CORACAO (GLfloat) 8
+
+#define RIGHT_MINIMAP 1
+#define LEFT_MINIMAP 0
 
 //Key status
 int key_status[256];
@@ -120,6 +123,84 @@ void MensagemDeVitoria(GLfloat x, GLfloat y)
     }
 }
 
+void DesenhaMiniMapa(Jogador *j1, Jogador *j2, int side) {
+    // Salva as matrizes atuais
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+        glLoadIdentity();
+
+        GLint mapSize = width / 4;
+        switch (side)
+        {
+        case LEFT_MINIMAP: 
+            glViewport(width/2 - mapSize, 0,
+                       mapSize, mapSize);
+            break;
+
+        case RIGHT_MINIMAP:
+            glViewport(width - mapSize, 0,
+                       mapSize, mapSize);
+            break;
+
+        }
+
+        // Configura a câmera ortogonal 2D
+        float r = arena->Raio();
+        gluOrtho2D(-r * 1.1, r * 1.1, -r * 1.1, r * 1.1); 
+
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+            glLoadIdentity();
+
+            // Desabilita luz e textura para o minimapa (estilo "radar")
+            glDisable(GL_LIGHTING);
+            glDisable(GL_TEXTURE_2D);
+            glDisable(GL_DEPTH_TEST);
+
+            // circulo do mapa
+            glColor3f(1.0f, 1.0f, 1.0f);
+            glBegin(GL_LINE_LOOP);
+                for (int i = 0; i < 360; i++) {
+                    float theta = i * M_PI / 180.0f;
+                    glVertex2f(r * cos(theta), r * sin(theta));
+                }
+            glEnd();
+
+            // 2. Obstáculos (Preto - ou cinza se o fundo for preto)
+            glColor3f(0.5f, 0.5f, 0.5f); // Cinza para destacar
+            
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glPointSize(8.0f);
+            for (Obstaculo o : arena->getObstaculosVector())
+            {
+                glBegin(GL_POINTS);
+                    glVertex2f(o.x, o.y);
+                glEnd();
+            }
+
+            // 3. Jogador 1 (Verde)
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glPointSize(5.0f); // Ponto grande
+            glBegin(GL_POINTS);
+                    glVertex2f(j1->X(), j1->Y());
+            glEnd();
+
+            // 4. Jogador 2 (Vermelho)
+            glColor3f(1.0f, 0.0f, 0.0f);
+            glBegin(GL_POINTS);
+                glVertex2f(j2->X(), j2->Y());
+            glEnd();
+            
+            // Restaura configurações
+            if (lighting_enabled) glEnable(GL_LIGHTING);
+            glEnable(GL_DEPTH_TEST);
+
+        glPopMatrix();
+        glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+}
+
 void SetaLuzPersonagens(void)
 {
     // --- j_1 ---
@@ -186,11 +267,10 @@ std::vector<Circulo> LeSVG(const std::string& nome_arquivo) {
             p_elemento->QueryFloatAttribute("cy", &circulo.y);
             p_elemento->QueryFloatAttribute("r", &circulo.raio);
             
+            circulo.y = -circulo.y;
             const char* fill = p_elemento->Attribute("fill");
-            if (fill)
-                circulo.cor = fill;
-            else
-                circulo.cor = "none";
+            if (fill) circulo.cor = fill;
+            else      circulo.cor = "none";
             ret.push_back(circulo);
         }
         p_elemento = p_elemento->NextSiblingElement();
@@ -377,9 +457,11 @@ void renderScene(void)
 
     glViewport(0, 0, width/2, height);
     renderPlayerScene(j_1, j_2);
+    DesenhaMiniMapa(j_1, j_2, LEFT_MINIMAP);
     
     glViewport(width/2, 0, width/2, height);
     renderPlayerScene(j_2, j_1);
+    DesenhaMiniMapa(j_2, j_1, RIGHT_MINIMAP);
 
     DesenhaHUD();
     if (estado > 0) MensagemDeVitoria(0, 0);
@@ -819,6 +901,7 @@ void inicializaObjetos()
     float arena_y = 0.0f;
     float arena_r = 0.0f;
 
+    // arena
     for (auto& c : circulos) {
         if (c.cor == "blue")
         {
@@ -840,6 +923,7 @@ void inicializaObjetos()
     float x_1 = 0.0f, y_1 = 0.0f, z_1 = 0.0f, r_1 = 0.0f;
     float x_2 = 0.0f, y_2 = 0.0f, z_2 = 0.0f, r_2 = 0.0f;
 
+    // jogadores
     for (auto& c : circulos) {
         if (c.cor == "red")   { x_1 = c.x;  y_1 = c.y;  r_1 = c.raio; }
         if (c.cor == "green") { x_2 = c.x;  y_2 = c.y;  r_2 = c.raio; }
@@ -853,6 +937,7 @@ void inicializaObjetos()
     j_1 = new Jogador(x_1, y_1, z_1, r_1, 1.0f, 0.0f, 0.0f, theta_1, 3);
     j_2 = new Jogador(x_2, y_2, z_2, r_2, 0.0f, 1.0f, 0.0f, theta_2, 3);
 
+    // objetos
     for (auto& c : circulos) {
         if (c.cor == "black") { arena->adicionaObstaculo(c.x, c.y, 0, c.raio); }
     }

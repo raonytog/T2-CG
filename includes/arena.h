@@ -55,10 +55,16 @@ public:
         this->obstaculos.emplace_back(Obstaculo{x, y, z, r});
     }
 
+    void DesenhaObstaculosMiniMapa();
+
     GLfloat X();
     GLfloat Y();
     GLfloat Z();
     GLfloat Raio();
+    std::vector<Obstaculo> getObstaculosVector() 
+    {
+        return this->obstaculos;
+    }
 
     void colisaoJogador(Jogador *j_1, Jogador *j_2);
     void colisaoTiro(std::vector<Tiro>& tiros);

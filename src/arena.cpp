@@ -56,6 +56,22 @@ void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
     }
 }
 
+void Arena::DesenhaObstaculosMiniMapa()
+{
+    for (auto& obst : this->obstaculos) {
+        glPushMatrix();
+        glTranslatef(obst.x, obst.y, 0);
+        // Desenha um círculo preenchido ou contorno para o obstáculo
+        glBegin(GL_POLYGON);
+        for(int i=0; i<360; i+=10){
+            float ang = i*M_PI/180;
+            glVertex2f(cos(ang)*obst.raio, sin(ang)*obst.raio);
+        }
+        glEnd();
+        glPopMatrix();
+    }
+}
+
 GLfloat Arena::X()
 {
     return this->gX;
