@@ -1,16 +1,52 @@
 #include "../includes/arena.h"
 
 void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
-                         GLfloat R, GLfloat G, GLfloat B, GLuint textureID)
+                         GLfloat R, GLfloat G, GLfloat B, GLuint texParede, GLuint texPiso)
 {
-    // desenha a superficie do chao
     glPushMatrix();
-        glTranslatef(x, y, z);
-        // DesenhaCirc(raio, R, G, B, DETALHE_ARENA, textureID);
-        DesenhaCilindro(raio, ALTURA_ARENA, R, G, B, DETALHE_ARENA, textureID);
+    glTranslatef(x, y, z);
+
+    // 1. Desenha o CHÃO
+    DesenhaCirc(raio, R, G, B, DETALHE_ARENA, texPiso);
+
+    // 2. Desenha o TETO
+    glPushMatrix();
+    glTranslatef(0, 0, ALTURA_ARENA);
+    DesenhaCirc(raio, R, G, B, DETALHE_ARENA, texPiso);
     glPopMatrix();
 
-    // desenha os obstaculos
+    // 3. Desenha as PAREDES (Laterais do cilindro)
+    // Implementação manual para garantir que a textura da parede seja aplicada corretamente
+    // sem interferir com o teto/chão e sem desenhar tampas extras.
+    if (texParede != 0) {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, texParede);
+        glColor3f(1.0f, 1.0f, 1.0f);
+    } else {
+        glDisable(GL_TEXTURE_2D);
+        glColor3f(R, G, B);
+    }
+
+    glBegin(GL_QUAD_STRIP);
+    for (int i = 0; i <= DETALHE_ARENA; i++) {
+        float angle = i * M_PI * 2 / DETALHE_ARENA;
+        float u = (float)i / DETALHE_ARENA;
+        
+        glNormal3f(cos(angle), sin(angle), 0.0f);
+        
+        if (texParede != 0) glTexCoord2f(u, 0.0f);
+        glVertex3f(raio * cos(angle), raio * sin(angle), 0.0f);
+        
+        if (texParede != 0) glTexCoord2f(u, 1.0f);
+        glVertex3f(raio * cos(angle), raio * sin(angle), ALTURA_ARENA);
+    }
+    glEnd();
+
+    if (texParede != 0) glDisable(GL_TEXTURE_2D);
+
+    glPopMatrix();
+
+    // desenha os obstaculos (mantido inalterado)
     for (auto& obst : this->obstaculos)
     {
         glPushMatrix();

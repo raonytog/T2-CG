@@ -30,8 +30,9 @@ class Arena {
     GLfloat raio;
     std::vector<Obstaculo> obstaculos;
 private:
+    // ATUALIZADO: Recebe texParede e texPiso
     void DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
-                      GLfloat R, GLfloat G, GLfloat B, GLuint textureID);
+                      GLfloat R, GLfloat G, GLfloat B, GLuint texParede, GLuint texPiso);
 
 public:
     friend class Jogador;
@@ -42,9 +43,11 @@ public:
         this->R = R;    this->G = G;    this->B = B;
         this->raio = raio;
     };
-    void Desenha(GLuint textureID)
+    
+    // ATUALIZADO: Recebe texParede e texPiso
+    void Desenha(GLuint texParede, GLuint texPiso)
     { 
-        DesenhaArena(gX, gY, gZ, raio, R, G, B, textureID);
+        DesenhaArena(gX, gY, gZ, raio, R, G, B, texParede, texPiso);
     };
 
     void adicionaObstaculo(float x, float y, float z, float r)

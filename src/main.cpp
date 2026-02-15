@@ -70,7 +70,7 @@ Jogador *j_2 = nullptr;
 std::vector<Tiro> tiros;
 
 // Textura de fundo
-GLuint BACKGROUND_TEXTURE = 0;
+GLuint WALL_TEXTURE = 0;
 GLuint FLOOR_TEXTURE = 0;
 
 int estado = 0;
@@ -329,7 +329,7 @@ void renderPlayerScene(Jogador *p1, Jogador *p2)
         if (p1->R() == 1) luzJogador(1);
         else if (p1->R() == 0) luzJogador(2);
 
-        arena->Desenha(FLOOR_TEXTURE);
+        arena->Desenha(WALL_TEXTURE, FLOOR_TEXTURE);
         p1->Desenha();
         p2->Desenha();
     }
@@ -362,7 +362,7 @@ void DesenhaFundo()
     glDisable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
 
-    glBindTexture(GL_TEXTURE_2D, BACKGROUND_TEXTURE);
+    glBindTexture(GL_TEXTURE_2D, 0);
     glColor3f(1.0f, 1.0f, 1.0f);
 
     float repeticao_y = 1.0f;
@@ -395,7 +395,7 @@ void renderScene(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Desenha o fundo antes de tudo
-    DesenhaFundo();
+    // DesenhaFundo();
 
     // p1
     glViewport(0, 0, width/2, height);
@@ -784,7 +784,7 @@ void init()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    BACKGROUND_TEXTURE = CarregaTextura("textures/background.png");
+    WALL_TEXTURE = CarregaTextura("textures/wall.jpg");
     FLOOR_TEXTURE = CarregaTextura("textures/floor.jpg");
 }
 
