@@ -26,7 +26,7 @@ using namespace tinyxml2;
 
 #define DETALHE_CORACAO 18
 #define TAMANHO_CORACAO (GLfloat) 24
-#define DISTANCIA_CORACAO (GLfloat) 8 // distância entre um coração e outro e distância da borda
+#define DISTANCIA_CORACAO (GLfloat) 8 
 
 #define CAM_POV 0
 #define CAM_GUN_POV 1
@@ -49,15 +49,17 @@ const GLint viewing_height = 500;
 const GLint fov = 60;
 const GLfloat aspect_ratio = (GLfloat)viewing_width / (GLfloat)viewing_height;
 
-const GLfloat light_position[] = {400, 0, 400, 0.75};
+// Luz Global (Sol/Ambiente)
+const GLfloat light_position[] = {400, 0, 600, 1.0f};
 
-GLfloat light_position_j_1[] = {0, 0, 0, 0.75};
-GLfloat light_difusa__j_1[] = {0, 0, 0, 0.75};
+// Luz Jogador 1 (Vermelha)
+GLfloat light_position_j_1[] = {0, 0, 400, 1.0f};
+GLfloat light_difusa__j_1[] = {0, 0, 0, 1.0f};
 
-GLfloat light_position_j_2[] = {0, 0, 0, 0.75};
-GLfloat light_difusa__j_2[] = {0, 0, 0, 0.75};
+// Luz Jogador 2 (Verde)
+GLfloat light_position_j_2[] = {0, 0, 400, 1.0f};
+GLfloat light_difusa__j_2[] = {0, 0, 0, 1.0f};
 
-// const GLfloat luz_ambiente[] = { 0.2f, 0.2f, 0.2f, 1.0f }; 
 const GLfloat luz_difusa[]   = { 0.7f, 0.7f, 0.7f, 1.0f };
 const GLfloat luz_especular[]= { 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -70,8 +72,12 @@ Jogador *j_2 = nullptr;
 std::vector<Tiro> tiros;
 
 // Textura de fundo
-GLuint WALL_TEXTURE = 0;
+GLuint BACKGROUND_TEXTURE = 0;
 GLuint FLOOR_TEXTURE = 0;
+GLuint WALL_TEXTURE = 0; // Se você adicionou a variável global conforme instruções anteriores
+
+// Controle de iluminação (tecla N)
+bool lighting_enabled = true;
 
 int estado = 0;
 // -1 para quit
@@ -111,27 +117,28 @@ void MensagemDeVitoria(GLfloat x, GLfloat y)
 
 void SetaLuzPersonagens(void)
 {
-    // luz do j1
+    // --- LUZ DO JOGADOR 1 ---
     light_position_j_1[0] = j_1->X();
     light_position_j_1[1] = j_1->Y();
-    light_position_j_1[2] = j_1->Z();
-    light_position_j_1[3] = 0.75f;
+    light_position_j_1[2] = j_1->Z() + ALTURA_MEMBROS; // Levemente acima do chão
+    light_position_j_1[3] = 1.0f; // W=1.0 para luz pontual
 
     light_difusa__j_1[0] = j_1->R();
     light_difusa__j_1[1] = j_1->G();
     light_difusa__j_1[2] = j_1->B();
-    light_difusa__j_1[3] = 1;
+    light_difusa__j_1[3] = 1.0f;
 
-    // luz do j2
+    // --- LUZ DO JOGADOR 2 ---
+    // CORRIGIDO: Agora usa as variáveis j_2 corretas e índices corretos
     light_position_j_2[0] = j_2->X();
-    light_position_j_2[2] = j_2->Y();
-    light_position_j_2[2] = j_2->Z();
-    light_position_j_2[3] = 0.75f;
+    light_position_j_2[1] = j_2->Y(); // Antes estava [2]
+    light_position_j_2[2] = j_2->Z() + ALTURA_MEMBROS; 
+    light_position_j_2[3] = 1.0f;
 
-    light_difusa__j_1[0] = j_1->R();
-    light_difusa__j_1[1] = j_1->G();
-    light_difusa__j_1[2] = j_1->B();
-    light_difusa__j_1[3] = 1;
+    light_difusa__j_2[0] = j_2->R(); // Antes estava lendo j_1 e escrevendo em j_1
+    light_difusa__j_2[1] = j_2->G();
+    light_difusa__j_2[2] = j_2->B();
+    light_difusa__j_2[3] = 1.0f;
 }
 
 struct Circulo
@@ -142,10 +149,6 @@ struct Circulo
     std::string cor;
 };
 
-// dados do SVG
-// inicialmente de acordo com os valores no SVG
-// mas são ajustados na primeira chamada da main
-// para serem convertidos às dimensões do jogo
 std::vector<Circulo> circulos;
 
 std::vector<Circulo> LeSVG(const std::string& nome_arquivo) {
@@ -170,7 +173,6 @@ std::vector<Circulo> LeSVG(const std::string& nome_arquivo) {
 
     while (p_elemento != nullptr)
     {
-        // lê o arquivo SGV até retornar todos os círculos
         const char* tag_nome = p_elemento->Name();
 
         if (std::strcmp(tag_nome, "circle") == 0)
@@ -196,7 +198,6 @@ std::vector<Circulo> LeSVG(const std::string& nome_arquivo) {
 
 void DesenhaCoracoes(int vidas_1, int vidas_2)
 {
-    // desenha corações do jogador 1 da esquerda pra direita
     GLfloat x_atual = -viewing_width / 2.0f + DISTANCIA_CORACAO + TAMANHO_CORACAO / 2.0f;
     GLfloat y_atual = viewing_height / 2.0f - DISTANCIA_CORACAO - TAMANHO_CORACAO / 2.0f;
 
@@ -210,7 +211,6 @@ void DesenhaCoracoes(int vidas_1, int vidas_2)
         x_atual += DISTANCIA_CORACAO + TAMANHO_CORACAO;
     }
 
-    // desenha corações do jogador 2 da direita pra esquerda
     x_atual = viewing_width / 2.0f - DISTANCIA_CORACAO - TAMANHO_CORACAO / 2.0f;
     for (int i = 0; i < vidas_2; i++)
     {
@@ -223,30 +223,6 @@ void DesenhaCoracoes(int vidas_1, int vidas_2)
     }
 }
 
-void PosicionaCamera(Jogador* p) {
-    float x = p->X();
-    float y = p->Y();
-    float r = p->RaioColisao();
-
-    float dist_camera = 50.0f; 
-    float altura_camera = 30.0f;
-    float theta_rad = p->Theta() * M_PI / 180.0f; 
-
-    // Posição do Olho (Câmera)
-    float cam_x = x;
-    float cam_y = y;
-    float cam_z = ALTURA_MEMBROS*3;
-
-    // Ponto para onde a câmera olha (Centro do Jogador)
-    float look_x = x;
-    float look_y = y;
-    float look_z = 0.0f; // Olha para o chão/centro do boneco
-
-    gluLookAt(cam_x, cam_y, cam_z,  // Eye
-              look_x, look_y, look_z,  // Center
-              0.0f, 0.0f, 1.0f);       // Up
-}
-
 void ConfiguraCameraJogador(Jogador* p, int cam) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -254,32 +230,25 @@ void ConfiguraCameraJogador(Jogador* p, int cam) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
-    // 1. Posição do Olho (Câmera)
     float eyeX = p->X() + p->RaioColisao();
     float eyeY = p->Y();
     float eyeZ = p->Z() + ALTURA_MEMBROS * 2.5f;
 
     float theta_rad = p->Theta() * M_PI / 180.0f;
 
-    // 2. Look vector 
     float lookX = eyeX + cos(theta_rad);
     float lookY = eyeY + sin(theta_rad);
-    float lookZ = eyeZ; // Olha reto no horizonte
+    float lookZ = eyeZ; 
 
-    // 3. Vetor Up (O topo da cabeça aponta para Z positivo)
-    gluLookAt(eyeX, eyeY, eyeZ,  // Olho
-              lookX, lookY, lookZ,  // Foco
-              0.0f, 0.0f, 1.0f);    // Up Vector
+    gluLookAt(eyeX, eyeY, eyeZ,  
+              lookX, lookY, lookZ,  
+              0.0f, 0.0f, 1.0f);    
 }
-
-// Em src/main.cpp
 
 void DesenhaHUD()
 {
-    // reseta o viewport para a tela toda
     glViewport(0, 0, width, height);
 
-    // Configura projeção 2D (Ortogonal)
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
         glLoadIdentity();
@@ -297,110 +266,67 @@ void DesenhaHUD()
             if (estado > 0) { MensagemDeVitoria(0, 50); }
 
             glEnable(GL_DEPTH_TEST);
-            glEnable(GL_LIGHTING);
+            // Reabilita luz apenas se o usuário não tiver desligado
+            if (lighting_enabled) glEnable(GL_LIGHTING);
         glPopMatrix();
         glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
 }
 
-void luzJogador(int qualJogador) {
-    if (qualJogador == 1) 
-    {
-        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-        glLightfv(GL_LIGHT1, GL_POSITION, light_position_j_1);
-        return;
-    }
+void ConfiguraLuzes() {
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-    if (qualJogador == 2)
-    {
-        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-        glLightfv(GL_LIGHT1, GL_POSITION, light_position_j_2);
-        return;
-    }
+    // Luz Jogador 1 (Vermelha) - GL_LIGHT1
+    glLightfv(GL_LIGHT1, GL_POSITION, light_position_j_1);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_difusa__j_1);
+    glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.75f);
+    glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.005f); 
+    glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.0f);
+
+    // Luz Jogador 2 (Verde) - GL_LIGHT2
+    glLightfv(GL_LIGHT2, GL_POSITION, light_position_j_2);
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, light_difusa__j_2);
+    glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 0.75f);
+    glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.005f); 
+    glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.0f);
+}
+
+bool first_pov_cam()
+{
+    return key_status[(int) 'v'] == 0 && key_status[(int) 'b'] == 0;
+
+}
+
+bool gun_pov_cam()
+{
+    return key_status[(int) 'v'] == 1 && key_status[(int) 'b'] == 0;
+}
+
+bool third_pov_cam()
+{
+    return key_status[(int) 'v'] == 0 && key_status[(int) 'b'] == 1;
 }
 
 void renderPlayerScene(Jogador *p1, Jogador *p2) 
 {
-    if (key_status[(int) 'v'] == 0 || key_status[(int) 'b'] == 0) 
-    {
-        ConfiguraCameraJogador(p1, CAM_POV);
+    if      (first_pov_cam()) { ConfiguraCameraJogador(p1, CAM_POV);     }
+    else if (gun_pov_cam())   { ConfiguraCameraJogador(p1, CAM_GUN_POV); }
+    else if (third_pov_cam()) { ConfiguraCameraJogador(p1, CAM_3TH_POV); }
 
-        if (p1->R() == 1) luzJogador(1);
-        else if (p1->R() == 0) luzJogador(2);
-
-        arena->Desenha(WALL_TEXTURE, FLOOR_TEXTURE);
-        p1->Desenha();
-        p2->Desenha();
-    }
-
-    if (key_status[(int) 'v'] == 1 && key_status[(int) 'b'] == 0) 
-    {
-    }
-
-    if (key_status[(int) 'v'] == 0 && key_status[(int) 'b'] == 1) 
-    {
-    }
-}
-
-void DesenhaFundo() 
-{
-    // Garante que desenha na tela toda
-    glViewport(0, 0, width, height);
-
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    gluOrtho2D(0, width, 0, height);
-
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-
-    // Desabilita luz e profundidade para desenhar o fundo 2D
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glEnable(GL_TEXTURE_2D);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glColor3f(1.0f, 1.0f, 1.0f);
-
-    float repeticao_y = 1.0f;
-    
-    // Calcula quantas vezes a textura cabe na largura da tela mantendo a proporção original.
-    float ratio_tela = (float)width / height;
-    float repeticao_x = repeticao_y * ratio_tela;
-
-    glBegin(GL_QUADS);
-        // Mapeia de 0 a repeticao_x na horizontal (repetição sequencial)
-        // Mapeia de 0 a 1.0 na vertical (sem repetição vertical)
-        glTexCoord2f(0.0f, 0.0f);               glVertex2f(0.0f, 0.0f);
-        glTexCoord2f(repeticao_x, 0.0f);        glVertex2f(width, 0.0f);
-        glTexCoord2f(repeticao_x, 1.0f);        glVertex2f(width, height);
-        glTexCoord2f(0.0f, repeticao_y);        glVertex2f(0.0f, height);
-    glEnd();
-
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_DEPTH_TEST);
-
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
+    ConfiguraLuzes();
+    arena->Desenha(WALL_TEXTURE, FLOOR_TEXTURE); 
+    p1->Desenha();
+    p2->Desenha();
 }
 
 void renderScene(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Desenha o fundo antes de tudo
-    // DesenhaFundo();
-
-    // p1
     glViewport(0, 0, width/2, height);
     renderPlayerScene(j_1, j_2);
-    // p2
+    
     glViewport(width/2, 0, width/2, height);
     renderPlayerScene(j_2, j_1);
 
@@ -419,7 +345,6 @@ void resetKeyStatus()
 
 void reset()
 {
-    // procura os valores iniciais dos jogadores
     float x_1 = 0.0f, y_1 = 0.0f, z_1 = 0.0f, r_1 = 0.0f;
     float x_2 = 0.0f, y_2 = 0.0f, z_2 = 0.0f, r_2 = 0.0f;
 
@@ -441,7 +366,6 @@ void reset()
             break;
     }
 
-    // ângulo inicial dos jogadores
     GLfloat theta_1 = normalizaAnguloGraus(atan2(y_2 - y_1, x_2 - x_1) * 180.0f / PI);
     GLfloat theta_2 = normalizaAnguloGraus(theta_1 + 180.0f);
 
@@ -462,14 +386,14 @@ void reset()
         }
     }
 
-    // inicia o jogo com o jogador 1 (controlado pelo mouse) com o braço em direção
-    // ao jogador 2
     mouse_x = j_2->X();
     mouse_Y = j_2->Y();
 
     resetKeyStatus();
-    key_status[(int) 'r'] = 1; // mantém o status de r como apertado
-                               // para evitar vários resets sequenciais
+    key_status[(int) 'r'] = 1;
+    
+    // Configura as posições e cores das luzes novamente
+    SetaLuzPersonagens();
 }
 
 void quit()
@@ -483,10 +407,17 @@ void keyPress(unsigned char key, int x, int y)
 {
     switch (key)
     {
+        case 'n':
+        case 'N':
+            lighting_enabled = !lighting_enabled;
+            if (lighting_enabled) glEnable(GL_LIGHTING);
+            else glDisable(GL_LIGHTING);
+            break;
+
         case 'r':
         case 'R':
-            if (key_status[(int) 'r'] == 0) // confere se não estava pressionado antes
-            {                               // para evitar vários resets sequenciais
+            if (key_status[(int) 'r'] == 0) 
+            {                               
                 reset();
                 estado = 0;
             }
@@ -519,10 +450,9 @@ void keyPress(unsigned char key, int x, int y)
         case 'K':
             key_status[(int) 'k'] = 1;
             break;
-        case 231: // ç
-        case 199: // Ç
-        case ';': // equivalente ao ç no meu wsl
-                  // que não sabe que eu tenho um teclado brasileiro
+        case 231: 
+        case 199: 
+        case ';': 
             key_status[231] = 1;
             break;
         case '4':
@@ -542,16 +472,16 @@ void keyPress(unsigned char key, int x, int y)
         case '.':
             key_status[(int) '.'] = 1;
             break;
-        case '1': //debug -> perde vida do p1
+        case '1': 
             key_status[(int) '1'] = 1;
             break;
-        case '2': //debug -> perde vida do p2
+        case '2': 
             key_status[(int) '2'] = 1;
             break;
-        case 'v': //camera a cima da arma
+        case 'v': 
             key_status[(int) 'v'] = 1;
             break;
-        case 'b': // terceira pesssoa com incremento/decremento de zoom com + ou -
+        case 'b': 
             key_status[(int) 'b'] = 1;
             break;
     }
@@ -561,7 +491,7 @@ void keyPress(unsigned char key, int x, int y)
 void keyUp(unsigned char key, int x, int y)
 {
     key_status[(int)(key)] = 0;
-    if (key == ';') // ver keyPress
+    if (key == ';') 
     {
         key_status[231] = 0;
     }
@@ -575,7 +505,7 @@ void mouseClick(int button, int state, int x, int y) {
         {
             GLfloat tiro_x = j_1->XPontaBraco();
             GLfloat tiro_y = j_1->YPontaBraco();
-            GLfloat tiro_z = j_1->Altura(); // NAO Ẽ ISSO
+            GLfloat tiro_z = j_1->Altura();
             GLfloat tiro_tamanho = j_1->EspessuraBraco();
             GLfloat tiro_theta = j_1->ThetaBraco();
 
@@ -595,11 +525,8 @@ void idle(void)
 {
     static GLdouble previous_time = glutGet(GLUT_ELAPSED_TIME);
     GLdouble current_time, d_t;
-    // pega o tempo que passou do início da aplicação
     current_time = glutGet(GLUT_ELAPSED_TIME);
-    // calcula o tempo decorrido desde de o última frame
     d_t = current_time - previous_time;
-    // atualiza o tempo do último frame ocorrido
     previous_time = current_time;
 
     if (estado == -1)
@@ -609,18 +536,9 @@ void idle(void)
     }
     else if (estado > 0) return;
 
-    // encontrei um problema ao rodar o código em casa onde a cada minuto,
-    // mais ou menos, o d_t dá um salto enorme (>1000) e faz com que
-    // o jogador tenha um movimento errático, quase se teleportando
-    // não encontrei esse problema no labgrad, então imagino que seja algum problema
-    // específico do wsl. então estou botando essa linha de código aqui
-    // pra evitar esse problema
     if (d_t > 10.0f) d_t = 10.0f;
     else if (d_t < 0.0f) d_t = 0.0f;
 
-    // bools que controlam a animação dos jogadores
-    // caso os jogadores estejam se movimentando pra frente, trás ou girando
-    // continua com a animação da perna, caso contrário, "reseta" a animação
     bool animacao_frente_1 = false;
     bool animacao_tras_1 = false;
     bool animacao_frente_2 = false;
@@ -765,6 +683,7 @@ void init()
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHT2); // Habilita a luz do segundo jogador
     glEnable(GL_DEPTH_TEST);
 
     
@@ -772,7 +691,6 @@ void init()
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
     glEnable(GL_NORMALIZE);
 
-    // glLightfv(GL_LIGHT0, GL_AMBIENT, luz_ambiente);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_difusa);
     glLightfv(GL_LIGHT0, GL_SPECULAR, luz_especular);
  
@@ -784,18 +702,16 @@ void init()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    WALL_TEXTURE = CarregaTextura("textures/wall.jpg");
     FLOOR_TEXTURE = CarregaTextura("textures/floor.jpg");
+    WALL_TEXTURE = CarregaTextura("textures/wall.jpg");
 }
 
-// inicializa arena e jogadores
 void inicializaObjetos()
 {
     float arena_x = 0.0f;
     float arena_y = 0.0f;
     float arena_r = 0.0f;
 
-    // procura o círculo da arena
     for (auto& c : circulos) {
         if (c.cor == "blue")
         {
@@ -806,7 +722,6 @@ void inicializaObjetos()
         }
     }
 
-    // modifica os valores dos círculos para centralizar a arena
     for (auto& c : circulos) {
         c.x -= arena_x;
         c.x *= std::min(viewing_height, viewing_width) / (2 * arena_r);
@@ -815,7 +730,6 @@ void inicializaObjetos()
         c.raio *= std::min(viewing_height, viewing_width) / (2 * arena_r);
     }
 
-    // procura os valores iniciais dos jogadores
     float x_1 = 0.0f, y_1 = 0.0f, z_1 = 0.0f, r_1 = 0.0f;
     float x_2 = 0.0f, y_2 = 0.0f, z_2 = 0.0f, r_2 = 0.0f;
 
@@ -825,7 +739,6 @@ void inicializaObjetos()
         if (r_1 > 0 && r_2 > 0) break;
     }
 
-    // ângulo inicial dos jogadores
     GLfloat theta_1 = normalizaAnguloGraus(atan2(y_2 - y_1, x_2 - x_1) * 180.0 / PI);
     GLfloat theta_2 = normalizaAnguloGraus(theta_1 + 180.0f);
 
@@ -837,12 +750,9 @@ void inicializaObjetos()
         if (c.cor == "black") { arena->adicionaObstaculo(c.x, c.y, 0, c.raio); }
     }
 
-    // inicia o jogo com o jogador 1 (controlado pelo mouse)
-    // com o braço em direção ao jogador 2
     mouse_x = j_2->X();
     mouse_Y = j_2->Y();
 
-    // seta as luzes dos personagens 
     SetaLuzPersonagens();
 }
  
@@ -856,19 +766,15 @@ int main(int argc, char *argv[])
 
     circulos = LeSVG(argv[1]);
 
-    // inicializa openGL
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
  
-    // cria a janela
     glutInitWindowSize(width, height);
     glutInitWindowPosition(150, 50);
     glutCreateWindow("Tranformations 3D");
 
-    // inicializa arena e jogadores
     inicializaObjetos();
  
-    // define callbacks
     glutDisplayFunc(renderScene);
     glutKeyboardFunc(keyPress);
     glutIdleFunc(idle);

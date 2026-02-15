@@ -32,7 +32,7 @@ void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
         float angle = i * M_PI * 2 / DETALHE_ARENA;
         float u = (float)i / DETALHE_ARENA;
         
-        glNormal3f(cos(angle), sin(angle), 0.0f);
+        glNormal3f(-cos(angle), -sin(angle), 0.0f);
         
         if (texParede != 0) glTexCoord2f(u, 0.0f);
         glVertex3f(raio * cos(angle), raio * sin(angle), 0.0f);
