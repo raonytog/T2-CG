@@ -190,14 +190,13 @@ void DesenhaMiniMapa(Jogador *j1, Jogador *j2, int side) {
             // j_1
             glColor3f(0.0f, 1.0f, 0.0f);
             glPushMatrix();
-            glTranslatef(j_1->X(), j_1->Y(), 0.0f);
+            glTranslatef(j1->X(), j1->Y(), 0.0f);
 
             glBegin(GL_TRIANGLE_FAN);
                 glVertex2f(0.0f, 0.0f);
                 for (int i = 0; i <= 360; i += 10) {
                         float theta = i * M_PI / 180.0f;
-                        // Use j_1->RaioColisao() ou j_1->R() dependendo da sua classe
-                        glVertex2f(j_1->RaioColisao() * cos(theta), j_1->RaioColisao() * sin(theta));
+                        glVertex2f(j1->RaioColisao() * cos(theta), j1->RaioColisao() * sin(theta));
                 }
             glEnd();
             glPopMatrix();
@@ -205,14 +204,13 @@ void DesenhaMiniMapa(Jogador *j1, Jogador *j2, int side) {
             // j_2
             glColor3f(1.0f, 0.0f, 0.0f);
             glPushMatrix();
-            glTranslatef(j_2->X(), j_2->Y(), 0.0f); 
+            glTranslatef(j2->X(), j2->Y(), 0.0f); 
 
             glBegin(GL_TRIANGLE_FAN);
                 glVertex2f(0.0f, 0.0f);
                 for (int i = 0; i <= 360; i += 10) {
                         float theta = i * M_PI / 180.0f;
-                        // Corrigido: Usando j_2 em vez de j_1
-                        glVertex2f(j_2->RaioColisao() * cos(theta), j_2->RaioColisao() * sin(theta));
+                        glVertex2f(j2->RaioColisao() * cos(theta), j2->RaioColisao() * sin(theta));
                 }
             glEnd();
             glPopMatrix();
