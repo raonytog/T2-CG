@@ -10,8 +10,8 @@ Jogador 3D   | braço e tiro             |  1.0  | 0.10
 Aparência    | lanterna                 |  1.0  | precisa por na ponta da arma (nao fiz por isso)
              | textura                  |  1.0  | 1
 -------------------------------------------------------
-             | camera 1                 |  1.0  | essa é a da ponta da arma
-Cameras      | camera 2                 |  1.0  | essa é a terceira pessoa
+             | camera 1                 |  1.0  | ponta-da-arma: nao fiz pois personagem
+Cameras      | camera 2                 |  1.0  | 1
              | visao do Jogador         |  1.0  | 1
 -------------------------------------------------------
 Bonus 1      | minimapa                 |  1.0  | ok p fazer

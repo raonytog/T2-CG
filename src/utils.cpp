@@ -166,19 +166,21 @@ void DesenhaXis(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B)
     glColor3f(R, G, B);
     glPointSize(1.0f);
 
+    GLfloat z = 2;
+    glNormal3d(0, 0, 1);
     glBegin(GL_TRIANGLE_FAN);
-        glVertex2f(d_x / 4.0f, 0.0f);
-        glVertex2f(d_x / 2.0f, d_y / 4.0f);
-        glVertex2f(d_x / 4.0f, d_y / 2.0f);
-        glVertex2f(0.0f, d_y / 4.0f);
-        glVertex2f(-d_x / 4.0f, d_y / 2.0f);
-        glVertex2f(-d_x / 2.0f, d_y / 4.0f);
-        glVertex2f(-d_x / 4.0f, 0.0f);
-        glVertex2f(-d_x / 2.0f, -d_y / 4.0f);
-        glVertex2f(-d_x / 4.0f, -d_y / 2.0f);
-        glVertex2f(0.0f, -d_y / 4.0f);
-        glVertex2f(d_x / 4.0f, -d_y / 2.0f);
-        glVertex2f(d_x / 2.0f, -d_y / 4.0f);
+        glVertex3d(d_x / 4.0f, 0.0f, z);
+        glVertex3d(d_x / 2.0f, d_y / 4.0f, z);
+        glVertex3d(d_x / 4.0f, d_y / 2.0f, z);
+        glVertex3d(0.0f, d_y / 4.0f, z);
+        glVertex3d(-d_x / 4.0f, d_y / 2.0f, z);
+        glVertex3d(-d_x / 2.0f, d_y / 4.0f, z);
+        glVertex3d(-d_x / 4.0f, 0.0f, z);
+        glVertex3d(-d_x / 2.0f, -d_y / 4.0f, z);
+        glVertex3d(-d_x / 4.0f, -d_y / 2.0f, z);
+        glVertex3d(0.0f, -d_y / 4.0f, z);
+        glVertex3d(d_x / 4.0f, -d_y / 2.0f, z);
+        glVertex3d(d_x / 2.0f, -d_y / 4.0f, z);
     glEnd();
 }
 

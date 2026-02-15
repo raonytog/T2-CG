@@ -35,6 +35,14 @@ int key_status[256];
 GLfloat mouse_x = 0.0f;
 GLfloat mouse_Y = 0.0f;
 
+// Controle de rotação lateral da câmera (Botão Direito)
+bool botaoDireitoPressionado = false;
+GLfloat mouse_x_anterior = 0.0f;
+GLfloat rotacao_horizontal_camera = 0.0f; // -180 a 180
+
+GLfloat mouse_y_anterior = 0.0f;
+GLfloat rotacao_vertical_camera = 0.0f; // -90 a 90
+
 // Window dimensions
 const GLint width = 800;
 const GLint height = 500;
@@ -46,7 +54,7 @@ const GLint viewing_height = 500;
 const GLint fov = 60;
 const GLfloat aspect_ratio = (GLfloat)viewing_width / (GLfloat)viewing_height;
 
-// Luz Global (Sol/Ambiente)
+// Luz Global
 const GLfloat light_position[] = {400, 0, 600, 1.0f};
 
 // Luz Jogador 1 (Vermelha)
@@ -71,11 +79,10 @@ std::vector<Tiro> tiros;
 // Textura de fundo
 GLuint BACKGROUND_TEXTURE = 0;
 GLuint FLOOR_TEXTURE = 0;
-GLuint WALL_TEXTURE = 0; // Se você adicionou a variável global conforme instruções anteriores
+GLuint WALL_TEXTURE = 0;
 
-// Controle de iluminação (tecla N)
 bool lighting_enabled = true;
-int cameraoom = 0;
+GLfloat camera_zoom = 5.0f;
 
 int estado = 0;
 // -1 para quit
@@ -226,12 +233,12 @@ bool first_pov_cam()
 
 bool gun_pov_cam()
 {
-    return key_status[(int) 'v'] == 1 && key_status[(int) 'b'] == 0;
+    return key_status[(int) 'v'] == 1;
 }
 
 bool third_pov_cam()
 {
-    return key_status[(int) 'v'] == 0 && key_status[(int) 'b'] == 1;
+    return key_status[(int) 'b'] == 1;
 }
 
 void ConfiguraCameraJogador(Jogador* p) {
@@ -242,8 +249,12 @@ void ConfiguraCameraJogador(Jogador* p) {
     glLoadIdentity();
     
     GLfloat x, y, z;                x = p->X(), y = p->Y(), z = p->Z();
-    GLfloat r, h;                   r = p->RaioColisao(), h = p->Altura();
+    GLfloat rJogador, h;            rJogador = p->RaioColisao(), h = p->Altura();
+    GLfloat rArena;                 rArena = arena->Raio();
     
+    float theta_rad = (p->Theta() + rotacao_horizontal_camera) * M_PI / 180.0f;
+    float phi_rad   = rotacao_vertical_camera * M_PI / 180.0f;
+
     float eyeX,  eyeY,  eyeZ;       eyeX  = eyeY  = eyeZ  = 0;
     float lookX, lookY, lookZ;      lookX = lookY = lookZ = 0;
     float upX,   upY,   upZ;        upX   = upY   = upZ   = 0;
@@ -251,9 +262,15 @@ void ConfiguraCameraJogador(Jogador* p) {
     // posicao da camera
     if (first_pov_cam())
     {
-        eyeX = x + r;
+        // posicao
+        eyeX = x + rJogador;
         eyeY = y;
         eyeZ = z + h;
+
+        // direcao
+        lookX = eyeX + cos(theta_rad);
+        lookY = eyeY + sin(theta_rad);
+        lookZ = eyeZ; 
     }
 
     else if (gun_pov_cam()) 
@@ -265,16 +282,29 @@ void ConfiguraCameraJogador(Jogador* p) {
 
     else if (third_pov_cam())
     {
-        eyeX = x + r;
-        eyeY = y - r;
-        eyeZ = z + h;
-    }
-    float theta_rad = p->Theta() * M_PI / 180.0f;
+        float distanciaAtras = rJogador * camera_zoom;
+        float alturaCamera = h * 2.0f;
 
-    // direcao da camera
-    lookX = eyeX + cos(theta_rad);
-    lookY = eyeY + sin(theta_rad);
-    lookZ = eyeZ; 
+        // Calcula a posição atrás do jogador baseada no ângulo atual
+        // posicao
+        eyeX = x - distanciaAtras * cos(theta_rad) * cos(phi_rad);
+        eyeY = y - distanciaAtras * sin(theta_rad) * sin(phi_rad);
+        eyeZ = z + alturaCamera; + distanciaAtras  * sin(phi_rad);
+
+        float distanciaCentro = sqrt(eyeX*eyeX + eyeY*eyeY);
+        if (distanciaCentro > arena->Raio()) {
+            // Se a câmera sair do mapa, desativa esta visão ou 
+            // fixa a câmera na borda da arena:
+            float escala = rArena / distanciaCentro;
+            eyeX *= escala;
+            eyeY *= escala;
+        }
+
+        // direcao
+        lookX = x;
+        lookY = y;
+        lookZ = z + h; 
+    }
 
     // up vector
     upZ = 1.0f;
@@ -317,14 +347,14 @@ void DesenhaHUD()
 void ConfiguraLuzes() {
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-    // Luz Jogador 1 (Vermelha) - GL_LIGHT1
+    // j_1 (vermelho)
     glLightfv(GL_LIGHT1, GL_POSITION, light_position_j_1);
     glLightfv(GL_LIGHT1, GL_DIFFUSE, light_difusa__j_1);
     glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.75f);
     glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.005f); 
     glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.0f);
 
-    // Luz Jogador 2 (Verde) - GL_LIGHT2
+    // j_2 (verde)
     glLightfv(GL_LIGHT2, GL_POSITION, light_position_j_2);
     glLightfv(GL_LIGHT2, GL_DIFFUSE, light_difusa__j_2);
     glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 0.75f);
@@ -487,7 +517,8 @@ void keyPress(unsigned char key, int x, int y)
             break;
         case 27:
             estado = -1;
-        case 'x':
+            case 'x':
+            case 'X':
             key_status[(int) 'x'] = 1;
             break;
         case '.':
@@ -500,10 +531,21 @@ void keyPress(unsigned char key, int x, int y)
             key_status[(int) '2'] = 1;
             break;
         case 'v': 
-            key_status[(int) 'v'] = 1;
+        case 'V':
+            key_status[(int) 'v'] = !key_status[(int) 'v'];
+            key_status[(int) 'b'] = 0;
             break;
+        case 'B':
         case 'b': 
-            key_status[(int) 'b'] = 1;
+            key_status[(int) 'b'] = !key_status[(int) 'b'];
+            key_status[(int) 'v'] = 0;
+            break;
+        case '+':
+        case '=':
+            if (camera_zoom > 1.0f) camera_zoom -= 0.1;
+            break;
+        case '-':
+            if (camera_zoom < 5.0f) camera_zoom += 0.1f;
             break;
     }
     glutPostRedisplay();
@@ -511,7 +553,10 @@ void keyPress(unsigned char key, int x, int y)
 
 void keyUp(unsigned char key, int x, int y)
 {
-    key_status[(int)(key)] = 0;
+    if (key != 'v' && key != 'V' && key != 'b' && key != 'B') {
+        key_status[(int)(key)] = 0;
+    }
+
     if (key == ';') 
     {
         key_status[231] = 0;
@@ -535,11 +580,44 @@ void mouseClick(int button, int state, int x, int y) {
             j_1->ResetaTimer();
         }
     }
+
+    // Lógica para o Botão Direito
+    if (button == GLUT_RIGHT_BUTTON) {
+        if (state == GLUT_DOWN) {
+            botaoDireitoPressionado = true;
+            mouse_x_anterior = x;
+            mouse_y_anterior = y;
+        } else {
+            botaoDireitoPressionado = false;
+        }
+    }
 }
 
 void mouseMove(int x, int y) {
     mouse_x = viewing_width * ((float) x / width - 0.5f);
     mouse_Y = -viewing_height * ((float) y / height - 0.5f);
+
+    if (botaoDireitoPressionado && third_pov_cam()) {
+        float sensibilidade = 0.5f;
+        
+        // Rotação Horizontal
+        float deltaX = x - mouse_x_anterior;
+        rotacao_horizontal_camera += deltaX * sensibilidade;
+        if (rotacao_horizontal_camera > 180.0f) rotacao_horizontal_camera = 180.0f;
+        if (rotacao_horizontal_camera < -180.0f) rotacao_horizontal_camera = -180.0f;
+
+        // Rotação Vertical (Movimento do mouse em Y)
+        float deltaY = y - mouse_y_anterior;
+        rotacao_vertical_camera += deltaY * sensibilidade;
+
+        if (rotacao_vertical_camera > 89.9f) rotacao_vertical_camera = 89.9f;
+        if (rotacao_vertical_camera < -89.9f) rotacao_vertical_camera = -89.9f;
+
+        mouse_x_anterior = x;
+        mouse_y_anterior = y;
+        
+        glutPostRedisplay();
+    }
 }
 
 void idle(void)
