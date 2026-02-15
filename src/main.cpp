@@ -305,10 +305,6 @@ void DesenhaCoracoes(int vidas_1, int vidas_2)
     }
 }
 
-bool first_pov_cam()
-{
-    return key_status[(int) 'v'] == 0 && key_status[(int) 'b'] == 0;
-}
 
 bool gun_pov_cam()
 {
@@ -318,6 +314,11 @@ bool gun_pov_cam()
 bool third_pov_cam()
 {
     return key_status[(int) 'b'] == 1;
+}
+
+bool first_pov_cam()
+{
+    return gun_pov_cam() == 0 && third_pov_cam() == 0;
 }
 
 void ConfiguraCameraJogador(Jogador* p) {
@@ -331,64 +332,69 @@ void ConfiguraCameraJogador(Jogador* p) {
     GLfloat rJogador, h;            rJogador = p->RaioColisao(), h = p->Altura();
     GLfloat rArena;                 rArena = arena->Raio();
     
+    // Convertendo ângulos para radianos
     float theta_rad = (p->Theta() + rotacao_horizontal_camera) * M_PI / 180.0f;
     float phi_rad   = rotacao_vertical_camera * M_PI / 180.0f;
 
-    float eyeX,  eyeY,  eyeZ;       eyeX  = eyeY  = eyeZ  = 0;
-    float lookX, lookY, lookZ;      lookX = lookY = lookZ = 0;
-    float upX,   upY,   upZ;        upX   = upY   = upZ   = 0;
+    float eyeX = 0, eyeY = 0, eyeZ = 0;
+    float lookX = 0, lookY = 0, lookZ = 0;
+    float upX = 0, upY = 0, upZ = 1;
 
-    // posicao da camera
     if (first_pov_cam())
     {
-        // posicao
-        eyeX = x + rJogador;
-        eyeY = y;
-        eyeZ = z + h;
+        // 1ª Pessoa: Olho na altura da cabeça
+        eyeX = x + (rJogador * 0.5f) * cos(theta_rad); // Leve offset para não ver dentro da cabeça
+        eyeY = y + (rJogador * 0.5f) * sin(theta_rad);
+        eyeZ = z + h * 0.9f; // Altura dos olhos
 
-        // direcao
         lookX = eyeX + cos(theta_rad);
         lookY = eyeY + sin(theta_rad);
-        lookZ = eyeZ; 
+        lookZ = eyeZ;
     }
 
     else if (gun_pov_cam()) 
     {
-        eyeX = 0;
-        eyeY = 0;
-        eyeZ = 0;
+        eyeX = p->XPontaBraco();
+        eyeY = p->YPontaBraco();
+        eyeZ = p->Altura(); 
+
+        float theta_arma = p->ThetaBraco() * M_PI / 180.0f;
+        lookX = eyeX + cos(theta_rad + theta_arma);
+        lookY = eyeY + sin(theta_rad + theta_arma);
+        lookZ = eyeZ;
     }
 
     else if (third_pov_cam())
     {
-        float distanciaAtras = rJogador * camera_zoom;
-        float alturaCamera = h * 2.0f;
+        // direcao da camera
+        float alturaAlvo = h / 2.0f; 
+        lookX = x;
+        lookY = y;
+        lookZ = z + alturaAlvo;
 
-        // Calcula a posição atrás do jogador baseada no ângulo atual
-        // posicao
-        eyeX = x - distanciaAtras * cos(theta_rad) * cos(phi_rad);
-        eyeY = y - distanciaAtras * sin(theta_rad) * sin(phi_rad);
-        eyeZ = z + alturaCamera; + distanciaAtras  * sin(phi_rad);
+        // 2. Distância da câmera
+        float dist = rJogador * camera_zoom;
 
-        float distanciaCentro = sqrt(eyeX*eyeX + eyeY*eyeY);
-        if (distanciaCentro > arena->Raio()) {
-            // Se a câmera sair do mapa, desativa esta visão ou 
-            // fixa a câmera na borda da arena:
-            float escala = rArena / distanciaCentro;
+        // posicao da camera
+        eyeX = lookX - dist * cos(phi_rad) * cos(theta_rad);
+        eyeY = lookY - dist * cos(phi_rad) * sin(theta_rad);
+        eyeZ = lookZ + dist * sin(phi_rad);
+
+        // colisao com a parede da arena
+        float distCentro = sqrt(eyeX*eyeX + eyeY*eyeY);
+        if (distCentro > rArena) {
+            float escala = (rArena - 1.0f) / distCentro;
             eyeX *= escala;
             eyeY *= escala;
         }
 
-        // direcao
-        lookX = x;
-        lookY = y;
-        lookZ = z + h; 
+        // colisao com a supercicie da arena
+        float alturaMinima = 2.0f;
+        if (eyeZ < alturaMinima) {
+            eyeZ = alturaMinima;
+        }
     }
 
-    // up vector
-    upZ = 1.0f;
-
-    // definicao da camera
     gluLookAt(eyeX, eyeY, eyeZ,
               lookX, lookY, lookZ,
               upX, upY, upZ);
