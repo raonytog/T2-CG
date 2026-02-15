@@ -885,7 +885,7 @@ void idle(void)
         j_1->Pula();
     }
 
-    if (key_status[(int) 'o']) 
+    if (key_status[(int) '.']) 
     {
         j_2->Pula();
     }

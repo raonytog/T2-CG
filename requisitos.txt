@@ -2,19 +2,22 @@ Item         | Sub-Item                 | Ponto | Feito
 -------------------------------------------------------
 Base do jogo | morrer, ganhar, mensagem |  1.0  | 1
 -------------------------------------------------------
-basicamente td q envolve os personagens ta meio capenga
-1. tem que tratar a colisao (um personagem DEVE poder ficar em cima do outro)
-2. a movimentacao deles ta sem animacao alguma
-
-esses aq dependem se vai usar um modelo 3d pronto ou nao tb
-3. falta fazer o joelho/juntas deles
-4. a arma tambem (assim com tudo relacionado a ela)
-
-fiquei sem tempo, mas o boneco verde ficou com o pulo errado (ele pulava no O, inves do .)
              | movimento das pernas     |  1.0  | 0.25
 Jogador 3D   | braço e tiro             |  1.0  | 0.10
              | pulo e obstaculos        |  1.0  | 0.75 melhorar o pulo
--------------------------------------------------------
+                                                 basicamente td q envolve os personagens 
+                                                 ta meio capenga
+                                                 1. tem que tratar a colisao 
+                                                    (um personagem DEVE poder ficar 
+                                                    em cima do outro)
+                                                 2. a movimentacao deles ta sem animacao alguma
+
+                                                 esses aq dependem se vai usar um 
+                                                 modelo 3d pronto ou nao tb
+                                                 3. falta fazer o joelho/juntas deles
+                                                 4. a arma tambem (assim como tudo 
+                                                    relacionado a ela)
+------------------------------------------------ -------
              | iluminacao               |  1.0  | 1
 Aparência    | lanterna                 |  1.0  | ponta-da-arma: nao fiz pq dos personagem
              | textura                  |  1.0  | 1 -> sinta-se livre pra mudar as texturas se achar 
