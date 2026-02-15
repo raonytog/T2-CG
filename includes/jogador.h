@@ -37,7 +37,7 @@
 #define ALTURA_MEMBROS 10.0f
 
 #define GRAVIDADE 0.01f
-#define VELOCIDADE_PULO 1.0f
+#define VELOCIDADE_PULO 0.8f
 
 class Jogador {
     GLfloat gX, gY, gZ;

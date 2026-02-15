@@ -445,6 +445,14 @@ void reset()
     
     // Configura as posições e cores das luzes novamente
     SetaLuzPersonagens();
+
+    // reseta as cameras
+    botaoDireitoPressionado = false;
+    mouse_x_anterior = 0.0f;
+    rotacao_horizontal_camera = 0.0f; // -180 a 180
+
+    mouse_y_anterior = 0.0f;
+    rotacao_vertical_camera = 0.0f; // -90 a 90
 }
 
 void quit()

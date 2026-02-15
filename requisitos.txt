@@ -7,10 +7,10 @@ Jogador 3D   | braço e tiro             |  1.0  | 0.10
              | pulo e obstaculos        |  1.0  | 0.75 melhorar o pulo
 -------------------------------------------------------
              | iluminacao               |  1.0  | 1
-Aparência    | lanterna                 |  1.0  | precisa por na ponta da arma (nao fiz por isso)
+Aparência    | lanterna                 |  1.0  | ponta-da-arma: nao fiz pq dos personagem
              | textura                  |  1.0  | 1
 -------------------------------------------------------
-             | camera 1                 |  1.0  | ponta-da-arma: nao fiz pois personagem
+             | camera 1                 |  1.0  | ponta-da-arma: nao fiz pq dos personagem
 Cameras      | camera 2                 |  1.0  | 1
              | visao do Jogador         |  1.0  | 1
 -------------------------------------------------------
