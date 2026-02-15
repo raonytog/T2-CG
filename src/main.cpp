@@ -48,11 +48,18 @@ GLfloat rotacao_vertical_camera = 0.0f; // -90 a 90
 
 // Window dimensions
 const GLint width = 800;
-const GLint height = 500;
+const GLint splitted_width = width/2;
+const GLint height = 700; // 500(tela normal)+200(visao permanente)
+
+// dimensao das larguras de cada jogador
+const GLint largura_inicial_j1 = 0;
+const GLint largura_inicial_j2 = width/2;
 
 // Viewing dimensions
 const GLint viewing_width = 400;
 const GLint viewing_height = 500;
+
+const GLint height_permanent_view = 200;
 
 const GLint fov = 60;
 const GLfloat aspect_ratio = (GLfloat)viewing_width / (GLfloat)viewing_height;
@@ -124,7 +131,6 @@ void MensagemDeVitoria(GLfloat x, GLfloat y)
 }
 
 void DesenhaMiniMapa(Jogador *j1, Jogador *j2, int side) {
-    // Salva as matrizes atuais
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
         glLoadIdentity();
@@ -144,7 +150,6 @@ void DesenhaMiniMapa(Jogador *j1, Jogador *j2, int side) {
 
         }
 
-        // Configura a câmera ortogonal 2D
         float r = arena->Raio();
         gluOrtho2D(-r * 1.1, r * 1.1, -r * 1.1, r * 1.1); 
 
@@ -152,12 +157,10 @@ void DesenhaMiniMapa(Jogador *j1, Jogador *j2, int side) {
         glPushMatrix();
             glLoadIdentity();
 
-            // Desabilita luz e textura para o minimapa (estilo "radar")
             glDisable(GL_LIGHTING);
             glDisable(GL_TEXTURE_2D);
             glDisable(GL_DEPTH_TEST);
 
-            // circulo do mapa
             glColor3f(1.0f, 1.0f, 1.0f);
             glBegin(GL_LINE_LOOP);
                 for (int i = 0; i < 360; i++) {
@@ -166,9 +169,6 @@ void DesenhaMiniMapa(Jogador *j1, Jogador *j2, int side) {
                 }
             glEnd();
 
-            // 2. Obstáculos (Preto - ou cinza se o fundo for preto)
-            glColor3f(0.5f, 0.5f, 0.5f); // Cinza para destacar
-            
             glColor3f(0.0f, 0.0f, 0.0f);
             glPointSize(8.0f);
             for (Obstaculo o : arena->getObstaculosVector())
@@ -178,20 +178,19 @@ void DesenhaMiniMapa(Jogador *j1, Jogador *j2, int side) {
                 glEnd();
             }
 
-            // 3. Jogador 1 (Verde)
+            // j_1 verde
             glColor3f(0.0f, 1.0f, 0.0f);
             glPointSize(5.0f); // Ponto grande
             glBegin(GL_POINTS);
                     glVertex2f(j1->X(), j1->Y());
             glEnd();
 
-            // 4. Jogador 2 (Vermelho)
+            // j_2 vermelho
             glColor3f(1.0f, 0.0f, 0.0f);
             glBegin(GL_POINTS);
                 glVertex2f(j2->X(), j2->Y());
             glEnd();
             
-            // Restaura configurações
             if (lighting_enabled) glEnable(GL_LIGHTING);
             glEnable(GL_DEPTH_TEST);
 
@@ -451,15 +450,63 @@ void renderPlayerScene(Jogador *p1, Jogador *p2)
     p2->Desenha();
 }
 
+void DesenhaVisaoPermanente(Jogador* p, int x_offset) {
+    glViewport(x_offset, 500, 400, 200);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(fov, (GLfloat)400/200, 0.1, 2000);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    
+    GLfloat x, y, z;                x = p->X(), y = p->Y(), z = p->Z();
+    GLfloat rJogador, h;            rJogador = p->RaioColisao(), h = p->Altura();
+    GLfloat rArena;                 rArena = arena->Raio();
+    
+    float theta_rad = (p->Theta() + rotacao_horizontal_camera) * M_PI / 180.0f;
+    float phi_rad   = rotacao_vertical_camera * M_PI / 180.0f;
+
+    float eyeX,  eyeY,  eyeZ;       eyeX  = eyeY  = eyeZ  = 0;
+    float lookX, lookY, lookZ;      lookX = lookY = lookZ = 0;
+    float upX,   upY,   upZ;        upX   = upY   = upZ   = 0;
+
+    // posicao
+    eyeX = x + rJogador;
+    eyeY = y;
+    eyeZ = z + h;
+
+    // direcao
+    lookX = eyeX + cos(theta_rad);
+    lookY = eyeY + sin(theta_rad);
+    lookZ = eyeZ;
+
+    gluLookAt(eyeX, eyeY, eyeZ,
+             lookX, lookY, lookZ,
+              0, 0, 1);
+
+    // Desenha a cena
+    ConfiguraLuzes();
+    arena->Desenha(WALL_TEXTURE, FLOOR_TEXTURE);
+    j_1->Desenha();
+    j_2->Desenha();
+}
+
+
 void renderScene(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glViewport(0, 0, width/2, height);
+    DesenhaVisaoPermanente(j_1, largura_inicial_j1);
+    DesenhaVisaoPermanente(j_2, largura_inicial_j2);
+
+    glViewport(largura_inicial_j1, 0, splitted_width, height);
     renderPlayerScene(j_1, j_2);
     DesenhaMiniMapa(j_1, j_2, LEFT_MINIMAP);
     
-    glViewport(width/2, 0, width/2, height);
+    glViewport(splitted_width, 0, largura_inicial_j2, height);
     renderPlayerScene(j_2, j_1);
     DesenhaMiniMapa(j_2, j_1, RIGHT_MINIMAP);
 
@@ -554,11 +601,10 @@ void keyPress(unsigned char key, int x, int y)
             if (lighting_enabled) glEnable(GL_LIGHTING);
             else glDisable(GL_LIGHTING);
             break;
-
         case 'r':
         case 'R':
             if (key_status[(int) 'r'] == 0) 
-            {                               
+            {
                 reset();
                 estado = 0;
             }
@@ -718,11 +764,7 @@ void idle(void)
     d_t = current_time - previous_time;
     previous_time = current_time;
 
-    if (estado == -1)
-    {
-        quit();
-        exit(0);
-    }
+    if (estado == -1) { quit(); exit(0); }
     else if (estado > 0) return;
 
     if (d_t > 10.0f) d_t = 10.0f;
