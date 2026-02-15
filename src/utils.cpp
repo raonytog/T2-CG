@@ -105,12 +105,13 @@ void DesenhaCilindro(GLfloat radius, GLfloat z, GLfloat R, GLfloat G, GLfloat B,
     glEnd();
 
     // Tampa superior (Sem textura ou textura plana)
-    glDisable(GL_TEXTURE_2D); // Desativa para a tampa (ou faça mapeamento planar se quiser)
-    if (textureID != 0) glColor3f(R, G, B); // Usa a cor original para a tampa
+    glDisable(GL_TEXTURE_2D);
+    if (textureID != 0) glColor3f(R, G, B);
     
-    glBegin(GL_POLYGON);
+    glBegin(GL_TRIANGLE_FAN);
     glNormal3f(0.0f, 0.0f, 1.0f);
-    for (int i = 0; i < detalhe; i++) {
+    glVertex3f(0.0f, 0.0f, z);
+    for (int i = 0; i <= detalhe; i++) {
         angle = i * PI * 2 / detalhe;
         glVertex3f(radius * cos(angle), radius * sin(angle), z);
     }

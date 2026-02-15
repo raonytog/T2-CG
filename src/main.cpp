@@ -28,9 +28,6 @@ using namespace tinyxml2;
 #define TAMANHO_CORACAO (GLfloat) 24
 #define DISTANCIA_CORACAO (GLfloat) 8 
 
-#define CAM_POV 0
-#define CAM_GUN_POV 1
-#define CAM_3TH_POV 2
 //Key status
 int key_status[256];
 
@@ -53,11 +50,11 @@ const GLfloat aspect_ratio = (GLfloat)viewing_width / (GLfloat)viewing_height;
 const GLfloat light_position[] = {400, 0, 600, 1.0f};
 
 // Luz Jogador 1 (Vermelha)
-GLfloat light_position_j_1[] = {0, 0, 400, 1.0f};
+GLfloat light_position_j_1[] = {0, 0, 0, 1.0f};
 GLfloat light_difusa__j_1[] = {0, 0, 0, 1.0f};
 
 // Luz Jogador 2 (Verde)
-GLfloat light_position_j_2[] = {0, 0, 400, 1.0f};
+GLfloat light_position_j_2[] = {0, 0, 0, 1.0f};
 GLfloat light_difusa__j_2[] = {0, 0, 0, 1.0f};
 
 const GLfloat luz_difusa[]   = { 0.7f, 0.7f, 0.7f, 1.0f };
@@ -78,6 +75,7 @@ GLuint WALL_TEXTURE = 0; // Se você adicionou a variável global conforme instr
 
 // Controle de iluminação (tecla N)
 bool lighting_enabled = true;
+int cameraoom = 0;
 
 int estado = 0;
 // -1 para quit
@@ -117,25 +115,24 @@ void MensagemDeVitoria(GLfloat x, GLfloat y)
 
 void SetaLuzPersonagens(void)
 {
-    // --- LUZ DO JOGADOR 1 ---
+    // --- j_1 ---
     light_position_j_1[0] = j_1->X();
     light_position_j_1[1] = j_1->Y();
-    light_position_j_1[2] = j_1->Z() + ALTURA_MEMBROS; // Levemente acima do chão
-    light_position_j_1[3] = 1.0f; // W=1.0 para luz pontual
+    light_position_j_1[2] = j_1->Z() + j_1->Altura() + ALTURA_MEMBROS;
+    light_position_j_1[3] = 1.0f;
 
     light_difusa__j_1[0] = j_1->R();
     light_difusa__j_1[1] = j_1->G();
     light_difusa__j_1[2] = j_1->B();
     light_difusa__j_1[3] = 1.0f;
 
-    // --- LUZ DO JOGADOR 2 ---
-    // CORRIGIDO: Agora usa as variáveis j_2 corretas e índices corretos
+    // --- j_2 ---
     light_position_j_2[0] = j_2->X();
-    light_position_j_2[1] = j_2->Y(); // Antes estava [2]
-    light_position_j_2[2] = j_2->Z() + ALTURA_MEMBROS; 
+    light_position_j_2[1] = j_2->Y();
+    light_position_j_2[2] = j_2->Z() + j_2->Altura() + ALTURA_MEMBROS; 
     light_position_j_2[3] = 1.0f;
 
-    light_difusa__j_2[0] = j_2->R(); // Antes estava lendo j_1 e escrevendo em j_1
+    light_difusa__j_2[0] = j_2->R();
     light_difusa__j_2[1] = j_2->G();
     light_difusa__j_2[2] = j_2->B();
     light_difusa__j_2[3] = 1.0f;
@@ -143,8 +140,7 @@ void SetaLuzPersonagens(void)
 
 struct Circulo
 {
-    float x;
-    float y;
+    float x, y;
     float raio;
     std::string cor;
 };
@@ -223,26 +219,70 @@ void DesenhaCoracoes(int vidas_1, int vidas_2)
     }
 }
 
-void ConfiguraCameraJogador(Jogador* p, int cam) {
+bool first_pov_cam()
+{
+    return key_status[(int) 'v'] == 0 && key_status[(int) 'b'] == 0;
+}
+
+bool gun_pov_cam()
+{
+    return key_status[(int) 'v'] == 1 && key_status[(int) 'b'] == 0;
+}
+
+bool third_pov_cam()
+{
+    return key_status[(int) 'v'] == 0 && key_status[(int) 'b'] == 1;
+}
+
+void ConfiguraCameraJogador(Jogador* p) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(fov, aspect_ratio, 0.1, 2000);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
-    float eyeX = p->X() + p->RaioColisao();
-    float eyeY = p->Y();
-    float eyeZ = p->Z() + ALTURA_MEMBROS * 2.5f;
+    GLfloat x, y, z;                x = p->X(), y = p->Y(), z = p->Z();
+    GLfloat r, h;                   r = p->RaioColisao(), h = p->Altura();
+    
+    float eyeX,  eyeY,  eyeZ;       eyeX  = eyeY  = eyeZ  = 0;
+    float lookX, lookY, lookZ;      lookX = lookY = lookZ = 0;
+    float upX,   upY,   upZ;        upX   = upY   = upZ   = 0;
 
+    // posicao da camera
+    if (first_pov_cam())
+    {
+        eyeX = x + r;
+        eyeY = y;
+        eyeZ = z + h;
+    }
+
+    else if (gun_pov_cam()) 
+    {
+        eyeX = 0;
+        eyeY = 0;
+        eyeZ = 0;
+    }
+
+    else if (third_pov_cam())
+    {
+        eyeX = x + r;
+        eyeY = y - r;
+        eyeZ = z + h;
+    }
     float theta_rad = p->Theta() * M_PI / 180.0f;
 
-    float lookX = eyeX + cos(theta_rad);
-    float lookY = eyeY + sin(theta_rad);
-    float lookZ = eyeZ; 
+    // direcao da camera
+    lookX = eyeX + cos(theta_rad);
+    lookY = eyeY + sin(theta_rad);
+    lookZ = eyeZ; 
 
-    gluLookAt(eyeX, eyeY, eyeZ,  
-              lookX, lookY, lookZ,  
-              0.0f, 0.0f, 1.0f);    
+    // up vector
+    upZ = 1.0f;
+
+    // definicao da camera
+    gluLookAt(eyeX, eyeY, eyeZ,
+              lookX, lookY, lookZ,
+              upX, upY, upZ);
 }
 
 void DesenhaHUD()
@@ -292,28 +332,9 @@ void ConfiguraLuzes() {
     glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.0f);
 }
 
-bool first_pov_cam()
-{
-    return key_status[(int) 'v'] == 0 && key_status[(int) 'b'] == 0;
-
-}
-
-bool gun_pov_cam()
-{
-    return key_status[(int) 'v'] == 1 && key_status[(int) 'b'] == 0;
-}
-
-bool third_pov_cam()
-{
-    return key_status[(int) 'v'] == 0 && key_status[(int) 'b'] == 1;
-}
-
 void renderPlayerScene(Jogador *p1, Jogador *p2) 
 {
-    if      (first_pov_cam()) { ConfiguraCameraJogador(p1, CAM_POV);     }
-    else if (gun_pov_cam())   { ConfiguraCameraJogador(p1, CAM_GUN_POV); }
-    else if (third_pov_cam()) { ConfiguraCameraJogador(p1, CAM_3TH_POV); }
-
+    ConfiguraCameraJogador(p1);
     ConfiguraLuzes();
     arena->Desenha(WALL_TEXTURE, FLOOR_TEXTURE); 
     p1->Desenha();
