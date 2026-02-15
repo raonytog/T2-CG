@@ -451,45 +451,49 @@ void renderPlayerScene(Jogador *p1, Jogador *p2)
 }
 
 void DesenhaVisaoPermanente(Jogador* p, int x_offset) {
-    glViewport(x_offset, 500, 400, 200);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    // Define o viewport na área superior (200px de altura)
+    glViewport(x_offset, viewing_height, viewing_width, height_permanent_view);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(fov, (GLfloat)400/200, 0.1, 2000);
+    // Ajusta o aspect ratio para 400/200 = 2.0
+    gluPerspective(fov, (GLfloat)viewing_width / (GLfloat)height_permanent_view, 0.1, 2000);
+
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
-    GLfloat x, y, z;                x = p->X(), y = p->Y(), z = p->Z();
-    GLfloat rJogador, h;            rJogador = p->RaioColisao(), h = p->Altura();
-    GLfloat rArena;                 rArena = arena->Raio();
+    // Dados do jogador
+    GLfloat x = p->X(), y = p->Y(), z = p->Z();
+    GLfloat r = p->RaioColisao(), h = p->Altura();
     
-    float theta_rad = (p->Theta() + rotacao_horizontal_camera) * M_PI / 180.0f;
-    float phi_rad   = rotacao_vertical_camera * M_PI / 180.0f;
+    // Calcula ângulo em radianos para posicionar a câmara
+    // Nota: A visão permanente geralmente não deve rodar com o rato (free look) se for "olhos do boneco",
+    // mas se quiser que siga o rato, use (p->Theta() + rotacao_horizontal_camera)
+    // Aqui usarei apenas p->Theta() para ser fiel à direção do corpo, mas pode alterar se preferir.
+    float theta_rad = p->Theta() * M_PI / 180.0f;
 
-    float eyeX,  eyeY,  eyeZ;       eyeX  = eyeY  = eyeZ  = 0;
-    float lookX, lookY, lookZ;      lookX = lookY = lookZ = 0;
-    float upX,   upY,   upZ;        upX   = upY   = upZ   = 0;
+    // Posiciona a câmara ligeiramente à frente do centro do jogador para não ver o interior da cabeça
+    float offset_frente = r * 0.5f;
 
-    // posicao
-    eyeX = x + rJogador;
-    eyeY = y;
-    eyeZ = z + h;
+    float eyeX = x + offset_frente * cos(theta_rad);
+    float eyeY = y + offset_frente * sin(theta_rad);
+    float eyeZ = z + h * 0.9f; // Quase no topo da altura (olhos)
 
-    // direcao
-    lookX = eyeX + cos(theta_rad);
-    lookY = eyeY + sin(theta_rad);
-    lookZ = eyeZ;
+    // O ponto para onde olha é à frente da posição do olho
+    float lookX = eyeX + cos(theta_rad);
+    float lookY = eyeY + sin(theta_rad);
+    float lookZ = eyeZ; // Olha em frente (horizonte)
 
     gluLookAt(eyeX, eyeY, eyeZ,
-             lookX, lookY, lookZ,
-              0, 0, 1);
+              lookX, lookY, lookZ,
+              0, 0, 1); // Up vector é Z
 
     // Desenha a cena
     ConfiguraLuzes();
     arena->Desenha(WALL_TEXTURE, FLOOR_TEXTURE);
+    
+    // Desenha os jogadores (o próprio jogador pode não aparecer se a câmara estiver dentro dele, 
+    // mas desenhamos para garantir que vemos o adversário)
     j_1->Desenha();
     j_2->Desenha();
 }
@@ -502,11 +506,11 @@ void renderScene(void)
     DesenhaVisaoPermanente(j_1, largura_inicial_j1);
     DesenhaVisaoPermanente(j_2, largura_inicial_j2);
 
-    glViewport(largura_inicial_j1, 0, splitted_width, height);
+    glViewport(largura_inicial_j1, 0, splitted_width, viewing_height);
     renderPlayerScene(j_1, j_2);
     DesenhaMiniMapa(j_1, j_2, LEFT_MINIMAP);
     
-    glViewport(splitted_width, 0, largura_inicial_j2, height);
+    glViewport(splitted_width, 0, largura_inicial_j2, viewing_height);
     renderPlayerScene(j_2, j_1);
     DesenhaMiniMapa(j_2, j_1, RIGHT_MINIMAP);
 
@@ -681,7 +685,7 @@ void keyPress(unsigned char key, int x, int y)
             if (camera_zoom > 1.0f) camera_zoom -= 0.1;
             break;
         case '-':
-            if (camera_zoom < 5.0f) camera_zoom += 0.1f;
+            if (camera_zoom < 10.0f) camera_zoom += 0.1f;
             break;
     }
     glutPostRedisplay();
