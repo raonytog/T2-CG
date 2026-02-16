@@ -6,18 +6,16 @@ void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
     glPushMatrix();
     glTranslatef(x, y, z);
 
-    // 1. Desenha o CHÃO
+    // chao
     DesenhaCirc(raio, R, G, B, DETALHE_ARENA, texPiso);
 
-    // 2. Desenha o TETO
+    // teto 
     glPushMatrix();
     glTranslatef(0, 0, ALTURA_ARENA);
     DesenhaCirc(raio, R, G, B, DETALHE_ARENA, texPiso);
     glPopMatrix();
 
-    // 3. Desenha as PAREDES (Laterais do cilindro)
-    // Implementação manual para garantir que a textura da parede seja aplicada corretamente
-    // sem interferir com o teto/chão e sem desenhar tampas extras.
+    // paredes
     if (texParede != 0) {
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, texParede);
@@ -46,7 +44,7 @@ void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
 
     glPopMatrix();
 
-    // desenha os obstaculos (mantido inalterado)
+    // obstáculos 
     for (auto& obst : this->obstaculos)
     {
         glPushMatrix();
