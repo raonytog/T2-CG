@@ -75,11 +75,10 @@ void DesenhaRectPos(GLfloat d_x, GLfloat d_y, GLfloat d_z, GLfloat R, GLfloat G,
 
 void DesenhaCilindro(GLfloat radius, GLfloat z, GLfloat R, GLfloat G, GLfloat B, int detalhe, GLuint textureID) 
 {
-    // Se passar textureID 0, desenha a cor sólida, senão desenha textura
     if (textureID != 0) {
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glColor3f(1.0f, 1.0f, 1.0f); // Reset cor para branco para não tingir a textura
+        glColor3f(1.0f, 1.0f, 1.0f);
     } else {
         glDisable(GL_TEXTURE_2D);
         glColor3f(R, G, B);
@@ -120,7 +119,6 @@ void DesenhaCilindro(GLfloat radius, GLfloat z, GLfloat R, GLfloat G, GLfloat B,
 
 void DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B, int detalhe, GLuint textureID)
 {
-    // Se passar textureID 0, desenha a cor sólida, senão desenha textura
     if (textureID != 0) {
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, textureID);
@@ -220,8 +218,6 @@ void DesenhaCoracao(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B, i
     glEnd();
 }
 
-// Em src/utils.cpp
-
 GLuint CarregaTextura(const char* nomeArquivo)
 {
     GLuint textureID;
@@ -243,11 +239,8 @@ GLuint CarregaTextura(const char* nomeArquivo)
     {
         GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
         
-        // --- CORREÇÃO AQUI ---
-        // Em vez de usar glTexImage2D + glGenerateMipmap, usamos gluBuild2DMipmaps
         // Essa função cria a textura E gera os mipmaps automaticamente de forma compatível
         gluBuild2DMipmaps(GL_TEXTURE_2D, format, width, height, format, GL_UNSIGNED_BYTE, data);
-        // ---------------------
     }
     else
     {
