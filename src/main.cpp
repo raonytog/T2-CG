@@ -497,9 +497,6 @@ void DesenhaVisaoPermanente(Jogador* p, int x_offset) {
     GLfloat r = p->RaioColisao(), h = p->Altura();
     
     // Calcula ângulo em radianos para posicionar a câmara
-    // Nota: A visão permanente geralmente não deve rodar com o rato (free look) se for "olhos do boneco",
-    // mas se quiser que siga o rato, use (p->Theta() + rotacao_horizontal_camera)
-    // Aqui usarei apenas p->Theta() para ser fiel à direção do corpo, mas pode alterar se preferir.
     float theta_rad = p->Theta() * M_PI / 180.0f;
 
     // Posiciona a câmara ligeiramente à frente do centro do jogador para não ver o interior da cabeça
@@ -516,14 +513,12 @@ void DesenhaVisaoPermanente(Jogador* p, int x_offset) {
 
     gluLookAt(eyeX, eyeY, eyeZ,
               lookX, lookY, lookZ,
-              0, 0, 1); // Up vector é Z
+              0, 0, 1);
 
     // Desenha a cena
     ConfiguraLuzes();
     arena->Desenha(WALL_TEXTURE, FLOOR_TEXTURE);
-    
-    // Desenha os jogadores (o próprio jogador pode não aparecer se a câmara estiver dentro dele, 
-    // mas desenhamos para garantir que vemos o adversário)
+
     j_1->Desenha();
     j_2->Desenha();
 }
@@ -948,7 +943,7 @@ void init()
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHT1);
-    glEnable(GL_LIGHT2); // Habilita a luz do segundo jogador
+    glEnable(GL_LIGHT2);
     glEnable(GL_DEPTH_TEST);
 
     
