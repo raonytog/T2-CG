@@ -447,8 +447,6 @@ void DesenhaHUD()
             if (estado > 0) { MensagemDeVitoria(0, 50); }
 
             glEnable(GL_DEPTH_TEST);
-            // Reabilita luz apenas se o usuário não tiver desligado
-            // if (lighting_enabled) glEnable(GL_LIGHTING);
             glEnable(GL_LIGHTING);
         glPopMatrix();
         glMatrixMode(GL_PROJECTION);
@@ -458,12 +456,16 @@ void DesenhaHUD()
 
 void ConfiguraLuzes() {
     if (lighting_enabled) {
+        glEnable(GL_LIGHT0);
+        glEnable(GL_LIGHT1);
+        glEnable(GL_LIGHT2);
+
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
         // j_1 (vermelho)
         glLightfv(GL_LIGHT1, GL_POSITION, light_position_j_1);
         glLightfv(GL_LIGHT1, GL_DIFFUSE, light_difusa__j_1);
-        glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.75f);
+        glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.5f);
         glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.005f); 
         glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.0f);
 
@@ -498,7 +500,6 @@ void DesenhaVisaoPermanente(Jogador* p, int x_offset) {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    // Ajusta o aspect ratio para 400/200 = 2.0
     gluPerspective(fov, (GLfloat)viewing_width / (GLfloat)height_permanent_view, 0.1, 2000);
 
     glMatrixMode(GL_MODELVIEW);
