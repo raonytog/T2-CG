@@ -131,12 +131,27 @@ void DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B, int detalhe, G
 
     glBegin(GL_TRIANGLE_FAN);
     glNormal3f(0.0f, 0.0f, 1.0f);
+
+    // 1. Centro do Círculo
+    // Mapeia o centro da geometria (0,0) para o centro da textura (0.5, 0.5)
+    if (textureID != 0) glTexCoord2f(0.5f, 0.5f);
     glVertex3f(0.0f, 0.0f, 0.0f);
+
     for (int i = 0; i <= detalhe; i++) {
-        float u = (float)i / detalhe; 
-        if (textureID != 0) glTexCoord2f(u, 0.0f);
-            glVertex3f(radius * cos(i * PI * 2 / detalhe), radius * sin(i * PI * 2 / detalhe), 0.0f);
+        float angle = i * PI * 2 / detalhe;
+        float x = cos(angle);
+        float y = sin(angle);
+
+        // 2. Borda do Círculo
+        // Mapeia as coordenadas [-1, 1] do círculo para [0, 1] da textura
+        // S = 0.5 + 0.5 * cos(a)
+        // T = 0.5 + 0.5 * sin(a)
+        if (textureID != 0) {
+            glTexCoord2f(0.5f + 0.5f * x, 0.5f + 0.5f * y);
         }
+        
+        glVertex3f(radius * x, radius * y, 0.0f);
+    }
     glEnd();
 
     glDisable(GL_TEXTURE_2D);

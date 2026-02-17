@@ -26,9 +26,10 @@ void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
     }
 
     glBegin(GL_QUAD_STRIP);
+    float repeticao = 10.0f;
     for (int i = 0; i <= DETALHE_ARENA; i++) {
         float angle = i * M_PI * 2 / DETALHE_ARENA;
-        float u = (float)i / DETALHE_ARENA;
+        float u = (float)i / DETALHE_ARENA * repeticao;
         
         glNormal3f(-cos(angle), -sin(angle), 0.0f);
         
