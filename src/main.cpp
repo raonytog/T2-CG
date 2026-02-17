@@ -77,6 +77,7 @@ GLfloat light_difusa__j_2[] = {0, 0, 0, 1.0f};
 
 const GLfloat luz_difusa[]   = { 0.7f, 0.7f, 0.7f, 1.0f };
 const GLfloat luz_especular[]= { 1.0f, 1.0f, 1.0f, 1.0f };
+const GLfloat luz_apagada[] =  { 0.0f, 0.0f, 0.0f, 0.8f };
 
 // Objetos
 Arena *arena = nullptr;
@@ -215,7 +216,8 @@ void DesenhaMiniMapa(Jogador *j1, Jogador *j2, int side) {
             glEnd();
             glPopMatrix();
             
-            if (lighting_enabled) glEnable(GL_LIGHTING);
+            // if (lighting_enabled) glEnable(GL_LIGHTING);
+            glEnable(GL_LIGHTING);
             glEnable(GL_DEPTH_TEST);
 
         glPopMatrix();
@@ -446,7 +448,8 @@ void DesenhaHUD()
 
             glEnable(GL_DEPTH_TEST);
             // Reabilita luz apenas se o usuário não tiver desligado
-            if (lighting_enabled) glEnable(GL_LIGHTING);
+            // if (lighting_enabled) glEnable(GL_LIGHTING);
+            glEnable(GL_LIGHTING);
         glPopMatrix();
         glMatrixMode(GL_PROJECTION);
     glPopMatrix();
@@ -454,21 +457,30 @@ void DesenhaHUD()
 }
 
 void ConfiguraLuzes() {
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    if (lighting_enabled) {
+        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-    // j_1 (vermelho)
-    glLightfv(GL_LIGHT1, GL_POSITION, light_position_j_1);
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_difusa__j_1);
-    glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.75f);
-    glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.005f); 
-    glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.0f);
+        // j_1 (vermelho)
+        glLightfv(GL_LIGHT1, GL_POSITION, light_position_j_1);
+        glLightfv(GL_LIGHT1, GL_DIFFUSE, light_difusa__j_1);
+        glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.75f);
+        glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.005f); 
+        glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.0f);
 
-    // j_2 (verde)
-    glLightfv(GL_LIGHT2, GL_POSITION, light_position_j_2);
-    glLightfv(GL_LIGHT2, GL_DIFFUSE, light_difusa__j_2);
-    glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 0.75f);
-    glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.005f); 
-    glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.0f);
+        // j_2 (verde)
+        glLightfv(GL_LIGHT2, GL_POSITION, light_position_j_2);
+        glLightfv(GL_LIGHT2, GL_DIFFUSE, light_difusa__j_2);
+        glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 0.75f);
+        glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.005f); 
+        glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.0f);
+    }
+    
+    else {
+        glDisable(GL_LIGHT0);
+        glDisable(GL_LIGHT1);
+        glDisable(GL_LIGHT2);
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luz_apagada);
+    }
 }
 
 void renderPlayerScene(Jogador *p1, Jogador *p2) 
@@ -627,8 +639,6 @@ void keyPress(unsigned char key, int x, int y)
         case 'n':
         case 'N':
             lighting_enabled = !lighting_enabled;
-            if (lighting_enabled) glEnable(GL_LIGHTING);
-            else glDisable(GL_LIGHTING);
             break;
         case 'r':
         case 'R':
@@ -960,7 +970,9 @@ void init()
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
     glEnable(GL_NORMALIZE);
 
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_difusa);
+    if (lighting_enabled) { glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_difusa); }
+    else                  { glLightfv(GL_LIGHT0, GL_DIFFUSE, luz_apagada); }
+
     glLightfv(GL_LIGHT0, GL_SPECULAR, luz_especular);
  
     glMatrixMode(GL_PROJECTION);
