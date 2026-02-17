@@ -97,16 +97,30 @@ void Arena::colisaoJogador(Jogador *j_1, Jogador *j_2)
     std::vector<std::pair<GLfloat, GLfloat>> v_2;
 
     // trata colisão entre jogadores
-    GLfloat dist_x = j_1->X() - j_2->X();
-    GLfloat dist_y = j_1->Y() - j_2->Y();
-    GLfloat dist = sqrt(pow(dist_x, 2.0f) + pow(dist_y, 2.0f));
-    GLfloat dist_min = j_1->RaioColisao() + j_2->RaioColisao();
+    GLfloat diff_z = j_1->Z() - j_2->Z();
 
-    if (dist < dist_min)
-    {
-        GLfloat ajuste = (dist_min - dist) / 2.0f;
-        v_1.push_back({ajuste * dist_x / dist, ajuste * dist_y / dist});
-        v_2.push_back({-ajuste * dist_x / dist, -ajuste * dist_y / dist});
+    // certifica que jogadores um jogador não está acima do outro
+    if (diff_z < j_2->Altura() && -diff_z < j_1->Altura()) {
+        
+        GLfloat dist_x = j_1->X() - j_2->X();
+        GLfloat dist_y = j_1->Y() - j_2->Y();
+        GLfloat dist = sqrt(pow(dist_x, 2.0f) + pow(dist_y, 2.0f));
+        GLfloat dist_min = j_1->RaioColisao() + j_2->RaioColisao();
+
+        if (dist < dist_min)
+        {
+            if (diff_z > j_2->Altura() * FRACAO_JOGADOR_PISANDO_OPONENTE) {
+                // j_1 está pisando no j_2
+                j_1->Pousa(j_2->Altura() + j_2->Z());
+            } else if (-diff_z > j_1->Altura() * FRACAO_JOGADOR_PISANDO_OPONENTE) {
+                // j_2 está caindo na cabeça do j_1
+                j_2->Pousa(j_1->Altura()+ j_1->Z());
+            } else {
+                GLfloat ajuste = (dist_min - dist) / 2.0f;
+                v_1.push_back({ajuste * dist_x / dist, ajuste * dist_y / dist});
+                v_2.push_back({-ajuste * dist_x / dist, -ajuste * dist_y / dist});
+            }
+        }
     }
     
     // trata colisão com a borda

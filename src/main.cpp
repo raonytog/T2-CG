@@ -726,6 +726,15 @@ void keyUp(unsigned char key, int x, int y)
     {
         key_status[231] = 0;
     }
+
+    if (key == 'x') {
+        j_1->ParaPulo();
+    }
+
+    if (key == '.') {
+        j_2->ParaPulo();
+    }
+
     glutPostRedisplay();
 }
 

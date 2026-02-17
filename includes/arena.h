@@ -18,6 +18,11 @@
 #define ALTURA_OBSTACULO ALTURA_MEMBROS*3
 #define ALTURA_ARENA 5*ALTURA_OBSTACULO
 
+#define FRACAO_JOGADOR_PISANDO_OPONENTE 0.9
+// por exemplo, se o valor for 0.9, isso significa que se o jogador acima
+// estiver com seu Z entre 90 e 100% da altura do jogador abaixo, ele será ajustado verticalmente
+// e não horizontalmente, podendo ficar acima do outro jogador
+
 struct Obstaculo
 {
     float x, y, z;

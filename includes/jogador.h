@@ -37,11 +37,12 @@
 #define ALTURA_MEMBROS 10.0f
 
 #define GRAVIDADE 0.01f
-#define VELOCIDADE_PULO 0.8f
+#define VELOCIDADE_PULO 1.0f
 
 class Jogador {
     GLfloat gX, gY, gZ;
     GLfloat raio, gVelZ;
+    GLint no_ar, pulando, pisando_oponente;
     GLfloat gR, gG, gB;
     GLfloat animacao;
     GLfloat gTheta;
@@ -56,12 +57,12 @@ private:
     void DesenhaJogador(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
                         GLfloat R, GLfloat G, GLfloat B,
                         GLfloat animacao, GLfloat theta, GLfloat theta_braco, int vidas);
-    void DesenhaSuperior(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
-                         GLfloat R, GLfloat G, GLfloat B,
-                         GLfloat animacao, GLfloat theta, GLfloat theta_braco, int vidas);
-    void DesenhaInferior(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
-                         GLfloat R, GLfloat G, GLfloat B,
-                         GLfloat animacao, GLfloat theta, GLfloat theta_braco, int vidas);
+    // void DesenhaSuperior(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
+    //                      GLfloat R, GLfloat G, GLfloat B,
+    //                      GLfloat animacao, GLfloat theta, GLfloat theta_braco, int vidas);
+    // void DesenhaInferior(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
+    //                      GLfloat R, GLfloat G, GLfloat B,
+    //                      GLfloat animacao, GLfloat theta, GLfloat theta_braco, int vidas);
 
 public:
     Jogador(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
@@ -76,20 +77,23 @@ public:
         this->vidas = vidas;
         this->timerTiro = 0.0f;
         this->gVelZ = 0.0f;
+        this->no_ar = 0;
+        this->pulando = 0;
+        this->pisando_oponente = 0;
     };
 
     void Desenha()
     { 
         DesenhaJogador(gX, gY, gZ, raio, gR, gG, gB, animacao, gTheta, gThetaBraco, vidas);
     };
-    void DesenhaParteSuperior()
-    { 
-        DesenhaSuperior(gX, gY, gZ, raio, gR, gG, gB, animacao, gTheta, gThetaBraco, vidas);
-    };
-    void DesenhaParteInferior()
-    { 
-        DesenhaInferior(gX, gY, gZ, raio, gR, gG, gB, animacao, gTheta, gThetaBraco, vidas);
-    };
+    // void DesenhaParteSuperior()
+    // { 
+    //     DesenhaSuperior(gX, gY, gZ, raio, gR, gG, gB, animacao, gTheta, gThetaBraco, vidas);
+    // };
+    // void DesenhaParteInferior()
+    // { 
+    //     DesenhaInferior(gX, gY, gZ, raio, gR, gG, gB, animacao, gTheta, gThetaBraco, vidas);
+    // };
 
     void Move(GLfloat dist, GLfloat t_d);
     void Roda(GLfloat d_theta, GLfloat t_d);
@@ -105,10 +109,13 @@ public:
     GLfloat G()    { return this->gG;    }
     GLfloat B()    { return this->gB;    }
     GLfloat velZ() { return this->gVelZ; }
+    GLfloat NoAr() { return this->no_ar; }
+
     void MoveX(GLfloat dX);
     void MoveY(GLfloat dX);
-    void MoveZ(GLfloat dX);
+    // void MoveZ(GLfloat dX);
     void Pula();
+    void ParaPulo();
     void Pousa(GLfloat z);
     void AtualizaFisica(GLfloat t_d);
 

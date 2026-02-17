@@ -6,7 +6,7 @@ void Jogador::DesenhaBraco(GLfloat raio, GLfloat R, GLfloat G, GLfloat B, GLfloa
     glPushMatrix();
 
         glTranslatef(0.0f, raio * BRACO_DISTANCIA / 2, ALTURA_MEMBROS);
-        glRotatef(theta_braco, 0.0f, 0.0f, 1.0f); 
+        glRotatef(theta_braco, 0.0f, 0.0f, 1.0f);
 
         DesenhaRectXPos(BRACO_COMPRIMENTO * SCALE_COMPRIMENTO, 
                         BRACO_ESPESSURA * SCALE_ESPESSURA, 
@@ -17,19 +17,24 @@ void Jogador::DesenhaBraco(GLfloat raio, GLfloat R, GLfloat G, GLfloat B, GLfloa
 
 void Jogador::DesenhaPerna(GLfloat raio, GLfloat animacao, GLfloat R, GLfloat G, GLfloat B)
 {
+    // printf("%lf\n", this->animacao);
 
     GLfloat SCALE_COMPRIMENTO = 2, SCALE_ESPESSURA = 4, SCALE_ALTURA = 1;
     glPushMatrix();
-        glTranslatef(0.0f, raio * PERNA_DISTANCIA / 2, 0.0f);
-        DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO * cos(animacao),
+        // aumenta z e roda 180 para que a perna gire em torno do eixo do tronco
+        glTranslatef(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO, raio * PERNA_DISTANCIA / 2, ALTURA_MEMBROS * SCALE_ALTURA);
+        glRotatef(180.0f + 45.0f * sin(this->animacao), 0.0f, 1.0f, 0.0f);
+        DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO,
                         PERNA_ESPESSURA * SCALE_ESPESSURA, 
                         ALTURA_MEMBROS * SCALE_ALTURA, 
                         R, G, B);
     glPopMatrix();
 
     glPushMatrix();
-        glTranslatef(0.0f, -raio * PERNA_DISTANCIA / 2, 0.0f);
-        DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO * cos(animacao),
+        // aumenta z e roda 180 para que a perna gire em torno do eixo do tronco
+        glTranslatef(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO, -raio * PERNA_DISTANCIA / 2, ALTURA_MEMBROS * SCALE_ALTURA);
+        glRotatef(180.0f - 45.0f * sin(this->animacao), 0.0f, 1.0f, 0.0f);
+        DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO,
                         PERNA_ESPESSURA * SCALE_ESPESSURA, 
                         ALTURA_MEMBROS * SCALE_ALTURA, 
                         R, G, B);
@@ -50,7 +55,7 @@ void Jogador::DesenhaCorpo(GLfloat R, GLfloat G, GLfloat B) {
 void Jogador::DesenhaCabeca(GLfloat raio, GLfloat R, GLfloat G, GLfloat B) {
     glColor3d(R, G, B);
     glPushMatrix();
-        glTranslatef(0.0f, 0.0f, ALTURA_MEMBROS*2.5);
+        glTranslatef(0.0f, 0.0f, ALTURA_MEMBROS * 2.5);
         glutSolidSphere(raio/2, 20, 20);
     glPopMatrix();
 }
@@ -87,16 +92,25 @@ void Jogador::Move(GLfloat dist, GLfloat t_d)
 
 void Jogador::Pula() 
 {
-    if (this->gVelZ == 0.0f) 
+    if (!this->no_ar)
     {
         this->gVelZ = VELOCIDADE_PULO;
+        this->no_ar = 1;
+        this->pulando = 1;
     }
+}
+
+void Jogador::ParaPulo() 
+{
+    // faz com que o jogador começe a cair no ar (a tecla de pulo não está mais sendo pressionada)
+    this->pulando = 0;
 }
 
 void Jogador::Pousa(GLfloat z)
 {
     this->gZ = z;
     this->gVelZ = 0.0f;
+    this->no_ar = 0;
 }
 
 void Jogador::AtualizaFisica(GLfloat t_d)
@@ -111,7 +125,14 @@ void Jogador::AtualizaFisica(GLfloat t_d)
     if (this->gZ < 0.0f)
     {
         this->gZ = 0.0f;
-        this->gVelZ= 0.0f;
+        this->gVelZ = 0.0f;
+        this->no_ar = 0;
+    }
+
+    // se parou de pular (soltou a tecla), começa a cair
+    if (!this->pulando && this->gVelZ > 0.0f)
+    {
+        this->gVelZ = 0.00f;
     }
 }
 
