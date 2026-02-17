@@ -148,10 +148,13 @@ void Arena::colisaoJogador(Jogador *j_1, Jogador *j_2)
 
     // trata colisão com os obstáculos
     Jogador *jogadores[2] = {j_1, j_2};
+    std::vector<std::pair<GLfloat, GLfloat>>* vetores[2] = {&v_1, &v_2};
     for (auto& obst : this->obstaculos)
     {
-        for (Jogador *j : jogadores)
+        for (int i = 0; i < 2; i++)
         {
+            Jogador *j = jogadores[i];
+            
             GLfloat dist_x_1 = j->X() - obst.x;
             GLfloat dist_y_1 = j->Y() - obst.y;
             GLfloat dist_1 = sqrt(pow(dist_x_1, 2.0f) + pow(dist_y_1, 2.0f));
@@ -175,9 +178,9 @@ void Arena::colisaoJogador(Jogador *j_1, Jogador *j_2)
 
                 // Se não pousou/não está em cima, é colisão lateral (parede)
                 if (!pousou)
-                {
+                {   
                     GLfloat ajuste = dist_min_1 - dist_1;
-                    v_1.push_back({ajuste * dist_x_1 / dist_1, ajuste * dist_y_1 / dist_1});
+                    vetores[i]->push_back({ajuste * dist_x_1 / dist_1, ajuste * dist_y_1 / dist_1});
                 }
             }
         }
