@@ -19,25 +19,33 @@
 #define DETALHE_CABECA 36
 #define DETALHE_OMBRO 36
 
-#define PERNA_DISTANCIA 0.5f // distância do centro da cabeça, não entre uma perna e outra
-#define PERNA_COMPRIMENTO 1.6f
-#define PERNA_ESPESSURA 0.75f
+#define ESCALA 1.0f
 
-#define BRACO_DISTANCIA 1.3f
-#define BRACO_COMPRIMENTO 1.3f
-#define BRACO_ESPESSURA 0.5f
+#define SEGMENTO_PERNA_DISTANCIA 0.6f // distância do centro da base da perna ao eixo z, não entre uma perna e outra
+#define SEGMENTO_PERNA_ALTURA 1.0f
+#define SEGMENTO_PERNA_ESPESSURA 0.2f // distância do centro do braço à ponta (raio do cilindro inscrito no prisma retangular)
 
-#define OMBRO_LONGITUDINAL 0.6f
-#define OMBRO_LATERAL 1.6f
+#define BRACO_DISTANCIA 0.6f // distância do centro da base do braço ao eixo z
+#define BRACO_COMPRIMENTO 2.0f
+#define BRACO_ESPESSURA 0.2f // distância do centro do braço à ponta (raio do cilindro inscrito no prisma retangular)
+
+#define OMBRO_ALTURA 4.0f
+#define OMBRO_LONGITUDINAL 0.2f // distância da ponta longitudinal do ombro ao eixo z
+#define OMBRO_LATERAL 0.8f // distância da ponta lateral do ombro ao eixo z
+
+#define TRONCO_ALTURA 2.0f
+
+#define CABECA_ALTURA 5.0f // centro da cabeça
+#define CABECA_RAIO 1.0f // raio da cabeça em relação ao raio limite do jogador
+
+#define ALTURA 6.0f
 
 #define DIST_COLISAO 1.0f
 
 #define TIMER_TIRO 500.0f // ms
 
-#define ALTURA_MEMBROS 10.0f
-
-#define GRAVIDADE 0.01f
-#define VELOCIDADE_PULO 1.0f
+#define GRAVIDADE 0.0005f
+#define VELOCIDADE_PULO 0.1f
 
 class Jogador {
     GLfloat gX, gY, gZ;
@@ -47,16 +55,18 @@ class Jogador {
     GLfloat animacao;
     GLfloat gTheta;
     GLfloat gThetaBraco;
+    GLfloat gThetaBracoVert;
     int vidas;
     GLfloat timerTiro;
 private:
-    void DesenhaBraco(GLfloat raio, GLfloat R, GLfloat G, GLfloat B, GLfloat theta_braco);
+    void DesenhaBraco(GLfloat raio, GLfloat R, GLfloat G, GLfloat B, GLfloat theta_braco, GLfloat theta_braco_vert);
     void DesenhaPerna(GLfloat raio, GLfloat animacao, GLfloat R, GLfloat G, GLfloat B);
     void DesenhaCorpo(GLfloat R, GLfloat G, GLfloat B);
     void DesenhaCabeca(GLfloat raio, GLfloat R, GLfloat G, GLfloat B);
     void DesenhaJogador(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
                         GLfloat R, GLfloat G, GLfloat B,
-                        GLfloat animacao, GLfloat theta, GLfloat theta_braco, int vidas);
+                        GLfloat animacao, GLfloat theta,
+                        GLfloat theta_braco, GLfloat theta_braco_vert, int vidas);
     // void DesenhaSuperior(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
     //                      GLfloat R, GLfloat G, GLfloat B,
     //                      GLfloat animacao, GLfloat theta, GLfloat theta_braco, int vidas);
@@ -70,10 +80,11 @@ public:
     {
         this->gX = x;   this->gY = y;   this->gZ = z;
         this->gR = R;    this->gG = G;    this->gB = B;
-        this->raio = raio;
+        this->raio = raio * ESCALA;
         this->animacao = 0.0f;
         this->gTheta = theta;
         this->gThetaBraco = 0.0f;
+        this->gThetaBracoVert = 0.0f;
         this->vidas = vidas;
         this->timerTiro = 0.0f;
         this->gVelZ = 0.0f;
@@ -84,7 +95,7 @@ public:
 
     void Desenha()
     { 
-        DesenhaJogador(gX, gY, gZ, raio, gR, gG, gB, animacao, gTheta, gThetaBraco, vidas);
+        DesenhaJogador(gX, gY, gZ, raio, gR, gG, gB, animacao, gTheta, gThetaBraco, gThetaBracoVert, vidas);
     };
     // void DesenhaParteSuperior()
     // { 
@@ -100,11 +111,15 @@ public:
     void Animacao(GLfloat dist, GLfloat t_d);
     void AnimacaoReset(GLfloat dist, GLfloat t_d);
     void RodaBraco(GLfloat d_theta_braco, GLfloat t_d);
-    void RodaBracoMouse(GLfloat d_theta_braco, GLfloat theta_alvo, GLfloat t_d);
+    void RodaBracoVert(GLfloat d_theta_braco_vert, GLfloat t_d);
+    void RodaBracoMouse(GLfloat d_theta_braco, GLfloat theta_alvo_horiz,
+                        GLfloat theta_alvo_vert, GLfloat t_d);
+    void AjustaBraco();
 
     GLfloat X()    { return this->gX;    }
     GLfloat Y()    { return this->gY;    }
     GLfloat Z()    { return this->gZ;    }
+    GLfloat Raio() { return this->raio;  }
     GLfloat R()    { return this->gR;    }
     GLfloat G()    { return this->gG;    }
     GLfloat B()    { return this->gB;    }
@@ -124,10 +139,15 @@ public:
 
     GLfloat XBaseBraco();
     GLfloat YBaseBraco();
+
     GLfloat XPontaBraco();
     GLfloat YPontaBraco();
+    GLfloat ZPontaBraco();
+
     GLfloat Theta();
     GLfloat ThetaBraco();
+    GLfloat ThetaBracoVert();
+
     GLfloat Altura();
     int Vidas();
 

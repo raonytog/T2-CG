@@ -1,21 +1,22 @@
 #include "../includes/tiro.h"
 
-void Tiro::DesenhaTiro(GLfloat x, GLfloat y, GLfloat z, GLfloat d_x, GLfloat d_y, GLfloat theta)
+void Tiro::DesenhaTiro(GLfloat gX, GLfloat gY, GLfloat gZ, GLfloat raio)
 {
+    // printf("%lf %lf %lf %lf\n", gX, gY, gZ, raio);
     glPushMatrix();
 
-    glTranslatef(x, y, z);
-    glRotatef(theta, 0.0f, 0.0f, 1.0f); 
+    glTranslatef(gX, gY, gZ);
 
-    DesenhaRectCentrado(d_x, d_y, 1.0f, 1.0f, 1.0f);
+    DesenhaEsfera(raio, 1.0f, 1.0f, 1.0f, 20);
 
     glPopMatrix();
 }
 
 void Tiro::Move(GLfloat dist, GLfloat t_d)
 {
-    this->gX += dist * t_d * cos(this->gTheta * PI / 180);
-    this->gY += dist * t_d * sin(this->gTheta * PI / 180);
+    this->gX += dist * t_d * cos(-gTheta * M_PI / 180.0f) * cos(-gThetaVert * M_PI / 180.0f);
+    this->gY += dist * t_d * sin(-gTheta * M_PI / 180.0f) * cos(-gThetaVert * M_PI / 180.0f);
+    this->gZ += dist * t_d * sin(-gThetaVert * M_PI / 180.0f);
 }
 
 GLfloat Tiro::X()
@@ -33,23 +34,12 @@ GLfloat Tiro::Z()
     return this->gZ;
 }
 
+GLfloat Tiro::Raio()
+{
+    return this->raio;
+}
+
 int Tiro::IdJogador()
 {
     return this->idJogador;
-}
-
-std::array<std::pair<GLfloat, GLfloat>, 4> Tiro::Pontos()
-{
-    std::array<std::pair<GLfloat, GLfloat>, 4> pontos;
-
-    pontos[0] = {this->gX + this->dX * sin(gTheta * 180.0f / PI) / 2.0f,
-                 this->gY + this->dY * cos(gTheta * 180.0f / PI) / 2.0f};
-    pontos[1] = {this->gX + this->dX * sin(gTheta * 180.0f / PI) / 2.0f,
-                 this->gY - this->dY * cos(gTheta * 180.0f / PI) / 2.0f};
-    pontos[2] = {this->gX - this->dX * sin(gTheta * 180.0f / PI) / 2.0f,
-                 this->gY - this->dY * cos(gTheta * 180.0f / PI) / 2.0f};
-    pontos[3] = {this->gX - this->dX * sin(gTheta * 180.0f / PI) / 2.0f,
-                 this->gY + this->dY * cos(gTheta * 180.0f / PI) / 2.0f};
-
-    return pontos;
 }

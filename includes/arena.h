@@ -15,8 +15,8 @@
 
 #define DETALHE_ARENA 120
 #define DETALHE_OBSTACULO 36
-#define ALTURA_OBSTACULO ALTURA_MEMBROS*3
-#define ALTURA_ARENA 5*ALTURA_OBSTACULO
+// #define ALTURA_OBSTACULO ALTURA_MEMBROS*3
+// #define ALTURA_ARENA 5*ALTURA_OBSTACULO
 
 #define FRACAO_JOGADOR_PISANDO_OPONENTE 0.9
 // por exemplo, se o valor for 0.9, isso significa que se o jogador acima
@@ -27,37 +27,40 @@ struct Obstaculo
 {
     float x, y, z;
     float raio;
+    float altura;
 };
 
 class Arena {
     GLfloat gX, gY, gZ; 
     GLfloat R, G, B;
     GLfloat raio;
+    GLfloat altura;
     std::vector<Obstaculo> obstaculos;
 private:
     // ATUALIZADO: Recebe texParede e texPiso
-    void DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
+    void DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio, GLfloat altura,
                       GLfloat R, GLfloat G, GLfloat B, GLuint texParede, GLuint texPiso);
 
 public:
     friend class Jogador;
 
-    Arena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio, GLfloat R, GLfloat G, GLfloat B)
+    Arena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio, GLfloat altura, GLfloat R, GLfloat G, GLfloat B)
     {
         this->gX = x;   this->gY = y;   this->gZ = z;
         this->R = R;    this->G = G;    this->B = B;
         this->raio = raio;
+        this->altura = altura;
     };
     
     // ATUALIZADO: Recebe texParede e texPiso
     void Desenha(GLuint texParede, GLuint texPiso)
     { 
-        DesenhaArena(gX, gY, gZ, raio, R, G, B, texParede, texPiso);
+        DesenhaArena(gX, gY, gZ, raio, altura, R, G, B, texParede, texPiso);
     };
 
     void adicionaObstaculo(float x, float y, float z, float r)
     {
-        this->obstaculos.emplace_back(Obstaculo{x, y, z, r});
+        this->obstaculos.emplace_back(Obstaculo{x, y, z, r, altura / 4.0f});
     }
 
     void DesenhaObstaculosMiniMapa();

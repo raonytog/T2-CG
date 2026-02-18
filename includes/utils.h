@@ -28,6 +28,14 @@ void DesenhaElipse(GLfloat r_x, GLfloat r_y, GLfloat R, GLfloat G, GLfloat B, in
 void DesenhaXis(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B);
 void DesenhaCoracao(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B, int detalhe);
 
+void DesenhaEsfera(GLfloat radius, GLfloat R, GLfloat G, GLfloat B, int detalhe);
+
+// x_1 > x_2; y_1 > y_2; z_1 > z_2;
+void DesenhaPrismaRetangular(GLfloat x_1, GLfloat x_2,
+                             GLfloat y_1, GLfloat y_2,
+                             GLfloat z_1, GLfloat z_2,
+                             GLfloat R, GLfloat G, GLfloat B);
+
 GLuint CarregaTextura(const char* nomeArquivo);
 void debug();
 

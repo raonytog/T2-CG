@@ -157,6 +157,39 @@ void DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B, int detalhe, G
     glDisable(GL_TEXTURE_2D);
 }
 
+void DesenhaEsfera(GLfloat radius, GLfloat R, GLfloat G, GLfloat B, int detalhe)
+{
+    glColor3f(R, G, B);
+
+    // itera sobre as fatias verticais (latitude: -90 a 90 graus)
+    for (int i = 0; i <= detalhe; ++i) {
+        float lat0 = PI * (-0.5f + (float)(i - 1) / detalhe);
+        float z0  = sin(lat0);
+        float zr0 = cos(lat0);
+
+        float lat1 = PI * (-0.5f + (float)i / detalhe);
+        float z1  = sin(lat1);
+        float zr1 = cos(lat1);
+
+        glBegin(GL_TRIANGLE_STRIP);
+        // itera sobre as fatias horizontais (longitude: 0 a 360 graus)
+        for (int j = 0; j <= detalhe; ++j) {
+            float lng = 2 * PI * (float)(j - 1) / detalhe;
+            float x = cos(lng);
+            float y = sin(lng);
+
+            // normal e vértice para o anel inferior
+            glNormal3f(x * zr0, y * zr0, z0);
+            glVertex3f(radius * x * zr0, radius * y * zr0, radius * z0);
+
+            // normal e vértice para o anel superior
+            glNormal3f(x * zr1, y * zr1, z1);
+            glVertex3f(radius * x * zr1, radius * y * zr1, radius * z1);
+        }
+        glEnd();
+    }
+}
+
 void DesenhaElipse(GLfloat r_x, GLfloat r_y, GLfloat R, GLfloat G, GLfloat B, int detalhe)
 {
     glColor3f(R, G, B);
@@ -230,6 +263,59 @@ void DesenhaCoracao(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B, i
             t = 3.0f + (float) i / detalhe;
             glVertex2f((d_x / 4.0f) * (cos(PI * t) - 1), (d_y / 4.0f) * (-sin(PI * t) + 1));
         }
+    glEnd();
+}
+
+void DesenhaPrismaRetangular(GLfloat x_1, GLfloat x_2,
+                             GLfloat y_1, GLfloat y_2,
+                             GLfloat z_1, GLfloat z_2,
+                             GLfloat R, GLfloat G, GLfloat B)
+{
+    glColor3f(R, G, B);
+    glBegin(GL_QUADS);
+
+    // face superior (z = z_1) - normal para cima
+    glNormal3f(0.0f, 0.0f, 1.0f);
+    glVertex3f(x_1, y_1, z_1);
+    glVertex3f(x_2, y_1, z_1);
+    glVertex3f(x_2, y_2, z_1);
+    glVertex3f(x_1, y_2, z_1);
+
+    // face inferior (z = z_2) - normal para baixo
+    glNormal3f(0.0f, 0.0f, -1.0f);
+    glVertex3f(x_1, y_1, z_2);
+    glVertex3f(x_2, y_1, z_2);
+    glVertex3f(x_2, y_2, z_2);
+    glVertex3f(x_1, y_2, z_2);
+
+    // face traseira (y = y_1) - normal para trás
+    glNormal3f(0.0f, 1.0f, 0.0f);
+    glVertex3f(x_1, y_1, z_1);
+    glVertex3f(x_2, y_1, z_1);
+    glVertex3f(x_2, y_1, z_2);
+    glVertex3f(x_1, y_1, z_2);
+
+    // face frontal (y = y_2) - normal para frente
+    glNormal3f(0.0f, -1.0f, 0.0f);
+    glVertex3f(x_1, y_2, z_1);
+    glVertex3f(x_2, y_2, z_1);
+    glVertex3f(x_2, y_2, z_2);
+    glVertex3f(x_1, y_2, z_2);
+
+    // face direita (x = x_1) - normal para direita
+    glNormal3f(1.0f, 0.0f, 0.0f);
+    glVertex3f(x_1, y_1, z_1);
+    glVertex3f(x_1, y_2, z_1);
+    glVertex3f(x_1, y_2, z_2);
+    glVertex3f(x_1, y_1, z_2);
+
+    // face esquerda (x = x_2) - normal para esquerda
+    glNormal3f(-1.0f, 0.0f, 0.0f);
+    glVertex3f(x_2, y_1, z_1);
+    glVertex3f(x_2, y_2, z_1);
+    glVertex3f(x_2, y_2, z_2);
+    glVertex3f(x_2, y_1, z_2);
+
     glEnd();
 }
 

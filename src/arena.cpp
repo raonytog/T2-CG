@@ -1,6 +1,6 @@
 #include "../includes/arena.h"
 
-void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
+void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio, GLfloat altura,
                          GLfloat R, GLfloat G, GLfloat B, GLuint texParede, GLuint texPiso)
 {
     glPushMatrix();
@@ -11,7 +11,7 @@ void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
 
     // teto 
     glPushMatrix();
-    glTranslatef(0, 0, ALTURA_ARENA);
+    glTranslatef(0, 0, altura);
     DesenhaCirc(raio, R, G, B, DETALHE_ARENA, texPiso);
     glPopMatrix();
 
@@ -37,7 +37,7 @@ void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
         glVertex3f(raio * cos(angle), raio * sin(angle), 0.0f);
         
         if (texParede != 0) glTexCoord2f(u, 1.0f);
-        glVertex3f(raio * cos(angle), raio * sin(angle), ALTURA_ARENA);
+        glVertex3f(raio * cos(angle), raio * sin(angle), altura);
     }
     glEnd();
 
@@ -50,7 +50,7 @@ void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
     {
         glPushMatrix();
             glTranslatef(obst.x, obst.y, 0);
-            DesenhaCilindro(obst.raio, ALTURA_OBSTACULO, 1,1,1, DETALHE_OBSTACULO, 0);
+            DesenhaCilindro(obst.raio, altura / 4.0f, 1, 1, 1, DETALHE_OBSTACULO, 0);
         glPopMatrix();
     }
 }
@@ -170,10 +170,10 @@ void Arena::colisaoJogador(Jogador *j_1, Jogador *j_2)
                 bool pousou = false;
 
                 // Está voando acima do obstáculo
-                if (j->Z() >= ALTURA_OBSTACULO) { pousou = true; }
-                else if (j->velZ() <= 0.0f && j->Z() > ALTURA_OBSTACULO - 5.0f) {
+                if (j->Z() >= altura / 4.0f) { pousou = true; }
+                else if (j->velZ() <= 0.0f && j->Z() > altura / 4.0f - 5.0f) {
                     // Caindo e atingiu a borda superior -> Pousa
-                    j->Pousa(ALTURA_OBSTACULO);
+                    j->Pousa(altura / 4.0f);
                     pousou = true;
                 }
 
@@ -214,49 +214,40 @@ void Arena::colisaoTiro(std::vector<Tiro>& tiros)
     for (it = tiros.begin(); it != tiros.end();)
     {
         Tiro& tiro = *it;
-        std::array<std::pair<GLfloat, GLfloat>, 4> pontos = tiro.Pontos();
 
         // verifica se o tiro atingiu a borda da arena
-        // confere cada extremidade do retângulo
-        bool colisao = false;
-        for (int i = 0; i < 4; i++)
-        {
-            GLfloat dist_x = pontos[i].first - this->gX;
-            GLfloat dist_y = pontos[i].second - this->gY;
-            GLfloat dist = sqrt(pow(dist_x, 2.0f) + pow(dist_y, 2.0f));
+        GLfloat dist_x = tiro.X() - this->gX;
+        GLfloat dist_y = tiro.Y() - this->gY;
+        GLfloat dist = sqrt(pow(dist_x, 2.0f) + pow(dist_y, 2.0f));
 
-            if (dist > this->raio)
-            {
-                colisao = true;
-                break;
-            }
-        }
-
-        if (colisao)
+        if (dist > this->raio)
         {
             it = tiros.erase(it);
             continue;
         }
 
+        // verifica se está na altura para colidir com obstáculos
+        if (tiro.Z() > altura / 4.0f)
+        {
+            it++;
+            continue;
+        }
+
         // verifica se o tiro colidiu com um obstáculo
-        // confere cada extremidade do retângulo
-        // essa é uma simplificação que assume
-        // que a bala sempre é menor do que qualquer obstáculo
-        // achei válido assumir isso dado o contexto do jogo
+        bool colisao = false;
+
         for (const auto& obst : this->obstaculos)
         {
-            for (int i = 0; i < 4; i++)
-            {
-                GLfloat dist_x = pontos[i].first - obst.x;
-                GLfloat dist_y = pontos[i].second - obst.y;
-                GLfloat dist = sqrt(pow(dist_x, 2.0f) + pow(dist_y, 2.0f));
+            GLfloat dist_x = tiro.X() - obst.x;
+            GLfloat dist_y = tiro.Y() - obst.y;
+            GLfloat dist = sqrt(pow(dist_x, 2.0f) + pow(dist_y, 2.0f));
 
-                if (dist < obst.raio)
-                {
-                    colisao = true;
-                    break;
-                }
+            if (dist < obst.raio)
+            {
+                colisao = true;
+                continue;
             }
+
             if (colisao)
                 break;
         }

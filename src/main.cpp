@@ -36,7 +36,7 @@ int key_status[256];
 
 // MousePos
 GLfloat mouse_x = 0.0f;
-GLfloat mouse_Y = 0.0f;
+GLfloat mouse_y = 0.0f;
 
 // Controle de rotação lateral da câmera (Botão Direito)
 bool botaoDireitoPressionado = false;
@@ -231,7 +231,7 @@ void SetaLuzPersonagens(void)
     // --- j_1 ---
     light_position_j_1[0] = j_1->X();
     light_position_j_1[1] = j_1->Y();
-    light_position_j_1[2] = j_1->Z() + j_1->Altura() + ALTURA_MEMBROS;
+    light_position_j_1[2] = j_1->Z() + j_1->Altura();
     light_position_j_1[3] = 1.0f;
 
     light_difusa__j_1[0] = j_1->R();
@@ -242,7 +242,7 @@ void SetaLuzPersonagens(void)
     // --- j_2 ---
     light_position_j_2[0] = j_2->X();
     light_position_j_2[1] = j_2->Y();
-    light_position_j_2[2] = j_2->Z() + j_2->Altura() + ALTURA_MEMBROS; 
+    light_position_j_2[2] = j_2->Z() + j_2->Altura();
     light_position_j_2[3] = 1.0f;
 
     light_difusa__j_2[0] = j_2->R();
@@ -306,8 +306,8 @@ std::vector<Circulo> LeSVG(const std::string& nome_arquivo) {
 
 void DesenhaCoracoes(int vidas_1, int vidas_2)
 {
-    GLfloat x_atual = -viewing_width / 2.0f + DISTANCIA_CORACAO + TAMANHO_CORACAO / 2.0f;
-    GLfloat y_atual = viewing_height / 2.0f - DISTANCIA_CORACAO - TAMANHO_CORACAO / 2.0f;
+    GLfloat x_atual = -width / 2.0f + DISTANCIA_CORACAO + TAMANHO_CORACAO / 2.0f;
+    GLfloat y_atual = height / 2.0f - DISTANCIA_CORACAO - TAMANHO_CORACAO / 2.0f;
 
     for (int i = 0; i < vidas_1; i++)
     {
@@ -319,7 +319,7 @@ void DesenhaCoracoes(int vidas_1, int vidas_2)
         x_atual += DISTANCIA_CORACAO + TAMANHO_CORACAO;
     }
 
-    x_atual = viewing_width / 2.0f - DISTANCIA_CORACAO - TAMANHO_CORACAO / 2.0f;
+    x_atual = width / 2.0f - DISTANCIA_CORACAO - TAMANHO_CORACAO / 2.0f;
     for (int i = 0; i < vidas_2; i++)
     {
         glPushMatrix();
@@ -350,7 +350,7 @@ bool first_pov_cam()
 void ConfiguraCameraJogador(Jogador* p) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(fov, aspect_ratio, 0.1, 2000);
+    gluPerspective(fov, aspect_ratio, p->Raio(), 2000);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
@@ -492,6 +492,7 @@ void renderPlayerScene(Jogador *p1, Jogador *p2)
     arena->Desenha(WALL_TEXTURE, FLOOR_TEXTURE); 
     p1->Desenha();
     p2->Desenha();
+    for (auto& tiro : tiros) { tiro.Desenha(); }
 }
 
 void DesenhaVisaoPermanente(Jogador* p, int x_offset) {
@@ -500,7 +501,7 @@ void DesenhaVisaoPermanente(Jogador* p, int x_offset) {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(fov, (GLfloat)viewing_width / (GLfloat)height_permanent_view, 0.1, 2000);
+    gluPerspective(fov, (GLfloat)viewing_width / (GLfloat)height_permanent_view, p->Raio(), 2000);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -534,6 +535,7 @@ void DesenhaVisaoPermanente(Jogador* p, int x_offset) {
 
     j_1->Desenha();
     j_2->Desenha();
+    for (auto& tiro : tiros) { tiro.Desenha(); }
 }
 
 
@@ -546,7 +548,7 @@ void renderScene(void)
 
     glViewport(largura_inicial_j1, 0, splitted_width, viewing_height);
     renderPlayerScene(j_1, j_2);
-    DesenhaMiniMapa(j_1, j_2, LEFT_MINIMAP);
+    DesenhaMiniMapa(j_2, j_1, LEFT_MINIMAP);
     
     glViewport(splitted_width, 0, largura_inicial_j2, viewing_height);
     renderPlayerScene(j_2, j_1);
@@ -591,15 +593,15 @@ void reset()
     GLfloat theta_1 = normalizaAnguloGraus(atan2(y_2 - y_1, x_2 - x_1) * 180.0f / PI);
     GLfloat theta_2 = normalizaAnguloGraus(theta_1 + 180.0f);
 
-    delete arena;
-    arena = new Arena(0.0f, 0.0f, 0.0f, std::min(viewing_width, viewing_height) / 2.0f, 0.0f, 0.0f, 1.0f);
-
     tiros.clear();
 
     delete j_1;
     delete j_2;
     j_1 = new Jogador(x_1, y_1, z_1, r_1, 1.0f, 0.0f, 0.0f, theta_1, 3);
     j_2 = new Jogador(x_2, y_2, z_2, r_2, 0.0f, 1.0f, 0.0f, theta_2, 3);
+
+    delete arena;
+    arena = new Arena(0.0f, 0.0f, 0.0f, std::min(viewing_width, viewing_height) / 2.0f, j_1->Altura() * 4.0f, 0.0f, 0.0f, 1.0f);
 
     for (auto& c : circulos) {
         if (c.cor == "black")
@@ -609,7 +611,7 @@ void reset()
     }
 
     mouse_x = j_2->X();
-    mouse_Y = j_2->Y();
+    mouse_y = j_2->Y();
 
     resetKeyStatus();
     key_status[(int) 'r'] = 1;
@@ -700,13 +702,19 @@ void keyPress(unsigned char key, int x, int y)
         case '.':
             key_status[(int) '.'] = 1;
             break;
-        case '1': 
+        case '0':
+            key_status[(int) '0'] = 1;
+            break;
+        case '1':
             key_status[(int) '1'] = 1;
             break;
-        case '2': 
+        case '2':
             key_status[(int) '2'] = 1;
             break;
-        case 'v': 
+        case '8':
+            key_status[(int) '8'] = 1;
+            break;
+        case 'v':
         case 'V':
             key_status[(int) 'v'] = !key_status[(int) 'v'];
             key_status[(int) 'b'] = 0;
@@ -756,11 +764,12 @@ void mouseClick(int button, int state, int x, int y) {
         {
             GLfloat tiro_x = j_1->XPontaBraco();
             GLfloat tiro_y = j_1->YPontaBraco();
-            GLfloat tiro_z = j_1->Altura();
+            GLfloat tiro_z = j_1->ZPontaBraco();
             GLfloat tiro_tamanho = j_1->EspessuraBraco();
             GLfloat tiro_theta = j_1->ThetaBraco();
+            GLfloat tiro_theta_vert = j_1->ThetaBracoVert();
 
-            tiros.emplace_back(tiro_x, tiro_y, tiro_z, tiro_tamanho, tiro_theta, 1);
+            tiros.emplace_back(tiro_x, tiro_y, tiro_z, tiro_tamanho, tiro_theta, tiro_theta_vert, 1);
 
             j_1->ResetaTimer();
         }
@@ -780,7 +789,7 @@ void mouseClick(int button, int state, int x, int y) {
 
 void mouseMove(int x, int y) {
     mouse_x = viewing_width * ((float) x / width - 0.5f);
-    mouse_Y = -viewing_height * ((float) y / height - 0.5f);
+    mouse_y = -(viewing_height + height_permanent_view) * ((float) y / height - 0.5f);
 
     if (botaoDireitoPressionado && third_pov_cam()) {
         float sensibilidade = 0.5f;
@@ -885,11 +894,12 @@ void idle(void)
         {
             GLfloat tiro_x = j_2->XPontaBraco();
             GLfloat tiro_y = j_2->YPontaBraco();
-            GLfloat tiro_z = j_2->Altura();
+            GLfloat tiro_z = j_2->ZPontaBraco();
             GLfloat tiro_tamanho = j_2->EspessuraBraco();
             GLfloat tiro_theta = j_2->ThetaBraco();
+            GLfloat tiro_theta_vert = j_2->ThetaBracoVert();
 
-            tiros.emplace_back(tiro_x, tiro_y, tiro_z, tiro_tamanho, tiro_theta, 2);
+            tiros.emplace_back(tiro_x, tiro_y, tiro_z, tiro_tamanho, tiro_theta, tiro_theta_vert, 2);
 
             j_2->ResetaTimer();
         }
@@ -911,19 +921,31 @@ void idle(void)
         key_status[(int) '1'] = 0;
     }
 
-    if (key_status[(int) '2'])
+    if (key_status[(int) '0'])
     {
         j_2->DecrementaVida();
-        key_status[(int) '2'] = 0;
+        key_status[(int) '0'] = 0;
     }
 
     for (auto& tiro : tiros) { tiro.Move(V_TIRO, d_t); }
 
-    GLfloat theta_mouse = atan2(mouse_Y - j_1->YBaseBraco(), mouse_x - j_1->XBaseBraco()) * 180.0 / PI;
-    j_1->RodaBracoMouse(OMEGA_BRACO, theta_mouse, d_t);
+    GLfloat x_j_1 = (mouse_x + 100.0f) / 100.0f;
+    GLfloat y_j_1 = (mouse_y + 100.0f) / 100.0f;
+
+    GLfloat dist_j_1 = sqrt(x_j_1 * x_j_1 + y_j_1 * y_j_1); // distância do centro da tela do jogador 1
+    if (dist_j_1 > 1.0f)
+    {
+        x_j_1 /= dist_j_1;
+        y_j_1 /= dist_j_1;
+    }
+
+    j_1->RodaBracoMouse(OMEGA_BRACO, 45.0f * x_j_1, -45.0f * y_j_1, d_t);
 
     if (key_status[(int) '4']) { if (!key_status[(int) '6']) j_2->RodaBraco(OMEGA_BRACO, d_t); }
     else if (key_status[(int) '6']) { j_2->RodaBraco(-OMEGA_BRACO, d_t); }
+
+    if (key_status[(int) '2']) { if (!key_status[(int) '8']) j_2->RodaBracoVert(OMEGA_BRACO, d_t); }
+    else if (key_status[(int) '8']) { j_2->RodaBracoVert(-OMEGA_BRACO, d_t); }
 
     if (animacao_tras_1) j_1->Animacao(-V_JOGADOR, d_t);
     else if (animacao_frente_1) j_1->Animacao(V_JOGADOR, d_t);
@@ -1026,17 +1048,18 @@ void inicializaObjetos()
     GLfloat theta_1 = normalizaAnguloGraus(atan2(y_2 - y_1, x_2 - x_1) * 180.0 / PI);
     GLfloat theta_2 = normalizaAnguloGraus(theta_1 + 180.0f);
 
-    arena = new Arena(0.0f, 0.0f, 0.0f, std::min(viewing_width, viewing_height) / 2.0f, 0.0f, 0.0f, 1.0f);
     j_1 = new Jogador(x_1, y_1, z_1, r_1, 1.0f, 0.0f, 0.0f, theta_1, 3);
     j_2 = new Jogador(x_2, y_2, z_2, r_2, 0.0f, 1.0f, 0.0f, theta_2, 3);
+
+    arena = new Arena(0.0f, 0.0f, 0.0f, std::min(viewing_width, viewing_height) / 2.0f, j_1->Altura() * 4.0f, 0.0f, 0.0f, 1.0f);
 
     // objetos
     for (auto& c : circulos) {
         if (c.cor == "black") { arena->adicionaObstaculo(c.x, c.y, 0, c.raio); }
     }
 
-    mouse_x = j_2->X();
-    mouse_Y = j_2->Y();
+    mouse_x = -100.0f;
+    mouse_y = -100.0f;
 
     SetaLuzPersonagens();
 }

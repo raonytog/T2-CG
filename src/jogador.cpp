@@ -1,68 +1,89 @@
 #include "../includes/jogador.h"
 
-void Jogador::DesenhaBraco(GLfloat raio, GLfloat R, GLfloat G, GLfloat B, GLfloat theta_braco)
+void Jogador::DesenhaBraco(GLfloat raio, GLfloat R, GLfloat G, GLfloat B, GLfloat theta_braco, GLfloat theta_braco_vert)
 {
-    GLfloat SCALE_COMPRIMENTO = 2, SCALE_ESPESSURA = 4, SCALE_ALTURA = 1;
     glPushMatrix();
 
-        glTranslatef(0.0f, raio * BRACO_DISTANCIA / 2, ALTURA_MEMBROS);
-        glRotatef(theta_braco, 0.0f, 0.0f, 1.0f);
+        glTranslatef(0.0f, raio * BRACO_DISTANCIA, raio * (OMBRO_ALTURA - BRACO_ESPESSURA));
 
-        DesenhaRectXPos(BRACO_COMPRIMENTO * SCALE_COMPRIMENTO, 
-                        BRACO_ESPESSURA * SCALE_ESPESSURA, 
-                        ALTURA_MEMBROS * SCALE_ALTURA, 
-                        R, G, B);
+        glRotatef(-theta_braco, 0.0f, 0.0f, 1.0f);
+        glRotatef(theta_braco_vert, 0.0f, 1.0f, 0.0f);
+
+        DesenhaPrismaRetangular(raio * BRACO_COMPRIMENTO, 0.0f,
+                                raio * BRACO_ESPESSURA, raio * -BRACO_ESPESSURA,
+                                raio * BRACO_ESPESSURA, raio * -BRACO_ESPESSURA,
+                                R, G, B);
     glPopMatrix();
 }
 
+GLfloat pos_sin (GLfloat x)
+{
+    x = sin(x);
+    if (x < 0.0f) x = 0.0f;
+    return x;
+}
+
+// animacao perna
+// 0  1 2  3   4
+// | /  |  \   |
+// | |  |   \  |
+
 void Jogador::DesenhaPerna(GLfloat raio, GLfloat animacao, GLfloat R, GLfloat G, GLfloat B)
 {
-    // printf("%lf\n", this->animacao);
-
-    GLfloat SCALE_COMPRIMENTO = 2, SCALE_ESPESSURA = 4, SCALE_ALTURA = 1;
     glPushMatrix();
         // aumenta z e roda 180 para que a perna gire em torno do eixo do tronco
-        glTranslatef(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO, raio * PERNA_DISTANCIA / 2, ALTURA_MEMBROS * SCALE_ALTURA);
+        glTranslatef(0.0f, raio * SEGMENTO_PERNA_DISTANCIA, raio * TRONCO_ALTURA);
         glRotatef(180.0f + 45.0f * sin(this->animacao), 0.0f, 1.0f, 0.0f);
-        DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO,
-                        PERNA_ESPESSURA * SCALE_ESPESSURA, 
-                        ALTURA_MEMBROS * SCALE_ALTURA, 
-                        R, G, B);
+        DesenhaPrismaRetangular(raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
+                                raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
+                                0.0f, raio * SEGMENTO_PERNA_ALTURA, R, G, B);
+        glPushMatrix();
+            glTranslatef(0.0f, 0.0f, raio * SEGMENTO_PERNA_ALTURA);
+            glRotatef(45.0f * pos_sin(this->animacao + M_PI), 0.0f, 1.0f, 0.0f);
+            DesenhaPrismaRetangular(raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
+                                    raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
+                                    0.0f, raio * SEGMENTO_PERNA_ALTURA, R, G, B);
+        glPopMatrix();
     glPopMatrix();
 
     glPushMatrix();
         // aumenta z e roda 180 para que a perna gire em torno do eixo do tronco
-        glTranslatef(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO, -raio * PERNA_DISTANCIA / 2, ALTURA_MEMBROS * SCALE_ALTURA);
-        glRotatef(180.0f - 45.0f * sin(this->animacao), 0.0f, 1.0f, 0.0f);
-        DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO,
-                        PERNA_ESPESSURA * SCALE_ESPESSURA, 
-                        ALTURA_MEMBROS * SCALE_ALTURA, 
-                        R, G, B);
+        glTranslatef(0.0f, raio * -SEGMENTO_PERNA_DISTANCIA, raio * TRONCO_ALTURA);
+        glRotatef(180.0f + 45.0f * sin(this->animacao + M_PI), 0.0f, 1.0f, 0.0f);
+        DesenhaPrismaRetangular(raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
+                                raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
+                                0.0f, raio * SEGMENTO_PERNA_ALTURA, R, G, B);
+        glPushMatrix();
+            glTranslatef(0.0f, 0.0f, raio * SEGMENTO_PERNA_ALTURA);
+            glRotatef(45.0f * pos_sin(this->animacao), 0.0f, 1.0f, 0.0f);
+            DesenhaPrismaRetangular(raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
+                                    raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
+                                    0.0f, raio * SEGMENTO_PERNA_ALTURA, R, G, B);
+        glPopMatrix();
     glPopMatrix();
 }
 
 void Jogador::DesenhaCorpo(GLfloat R, GLfloat G, GLfloat B) {
-    GLfloat SCALE_COMPRIMENTO = 2, SCALE_ESPESSURA = 8, SCALE_ALTURA = 1;
     glPushMatrix();
-        glTranslatef(0.0f, 0.0f, ALTURA_MEMBROS);
-        DesenhaRectXPos(PERNA_COMPRIMENTO * SCALE_COMPRIMENTO,
-                        PERNA_ESPESSURA * SCALE_ESPESSURA, 
-                        ALTURA_MEMBROS * SCALE_ALTURA, 
-                        R, G , B);
+        glTranslatef(0.0f, 0.0f, raio * TRONCO_ALTURA);
+        DesenhaPrismaRetangular(raio * OMBRO_LONGITUDINAL, raio * -OMBRO_LONGITUDINAL,
+                                raio * OMBRO_LATERAL, raio * -OMBRO_LATERAL,
+                                raio * (OMBRO_ALTURA - TRONCO_ALTURA), 0.0f, R, G, B);
     glPopMatrix();
 }
 
 void Jogador::DesenhaCabeca(GLfloat raio, GLfloat R, GLfloat G, GLfloat B) {
     glColor3d(R, G, B);
     glPushMatrix();
-        glTranslatef(0.0f, 0.0f, ALTURA_MEMBROS * 2.5);
-        glutSolidSphere(raio/2, 20, 20);
+        glTranslatef(0.0f, 0.0f, raio * CABECA_ALTURA);
+        glutSolidSphere(raio * CABECA_RAIO, 20, 20);
     glPopMatrix();
 }
 
 void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat z, GLfloat unidade,
                             GLfloat R, GLfloat G, GLfloat B,
-                            GLfloat animacao, GLfloat theta, GLfloat theta_braco, int vidas)
+                            GLfloat animacao, GLfloat theta,
+                            GLfloat theta_braco, GLfloat theta_braco_vert, int vidas)
 {
     glPushMatrix();
 
@@ -73,7 +94,7 @@ void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat z, GLfloat unidade,
         glRotatef(theta, 0.0f, 0.0f, 1.0f);
 
         DesenhaPerna(raio, animacao, R, G, B);
-        DesenhaBraco(raio, R, G, B, theta_braco);
+        DesenhaBraco(raio, R, G, B, theta_braco, theta_braco_vert);
         DesenhaCorpo(R, G, B);
         DesenhaCabeca(raio, R, G, B);
         // DesenhaElipse(raio * OMBRO_LONGITUDINAL, raio * OMBRO_LATERAL, R, G, B, DETALHE_OMBRO);
@@ -94,7 +115,7 @@ void Jogador::Pula()
 {
     if (!this->no_ar)
     {
-        this->gVelZ = VELOCIDADE_PULO;
+        this->gVelZ = raio * VELOCIDADE_PULO;
         this->no_ar = 1;
         this->pulando = 1;
     }
@@ -116,7 +137,7 @@ void Jogador::Pousa(GLfloat z)
 void Jogador::AtualizaFisica(GLfloat t_d)
 {
     // Aplica gravidade na velocidade
-    this->gVelZ -= GRAVIDADE * t_d;
+    this->gVelZ -= raio * GRAVIDADE * t_d;
 
     // Aplica velocidade na posição Z
     this->gZ += this->gVelZ * t_d;
@@ -147,14 +168,14 @@ void Jogador::Animacao(GLfloat dist, GLfloat t_d)
     // divide por pi e pelo comprimento da perna
     // para que o movimento da perna seja continuo em função
     // à velocidade do jogador
-    this->animacao += dist * t_d / (2 * PI * PERNA_COMPRIMENTO);
+    this->animacao += dist * t_d / (2 * PI * SEGMENTO_PERNA_ALTURA);
     this->animacao = normalizaAnguloRadianos(this->animacao);
 }
 
 void Jogador::AnimacaoReset(GLfloat dist, GLfloat t_d)
 {
     // volta a uma posição neutra quando o jogador não está andando ou girando
-    float abs_diff = dist * t_d / (2.0f * PI * PERNA_COMPRIMENTO);
+    float abs_diff = dist * t_d / (2.0f * PI * SEGMENTO_PERNA_ALTURA);
     float delta;
 
     if (this->animacao < PI)
@@ -179,22 +200,58 @@ void Jogador::RodaBraco(GLfloat d_theta_braco, GLfloat t_d)
 {
     this->gThetaBraco += d_theta_braco * t_d;
     this->gThetaBraco = limite(this->gThetaBraco, 45.0f, -45.0f);
+
+    this->AjustaBraco();
 }
 
-void Jogador::RodaBracoMouse(GLfloat d_theta_braco, GLfloat theta_alvo, GLfloat t_d)
+void Jogador::RodaBracoVert(GLfloat d_theta_braco_vert, GLfloat t_d)
 {
-    float theta_braco_alvo = theta_alvo - this->gTheta;
-    theta_braco_alvo = normalizaAnguloGraus(theta_braco_alvo);
+    this->gThetaBracoVert += d_theta_braco_vert * t_d;
+    this->gThetaBracoVert = limite(this->gThetaBracoVert, 45.0f, -45.0f);
+    
+    this->AjustaBraco();
+}
 
-    if (this->gThetaBraco < theta_braco_alvo)
+void Jogador::AjustaBraco()
+{
+    // mantém a orientação do braço em cone
+    GLfloat x = this->gThetaBraco / 45.0f;
+    GLfloat y = this->gThetaBracoVert / 45.0f;
+    GLfloat dist_centro = sqrt(x * x + y * y);
+
+    if (dist_centro > 1.0f)
     {
-        this->gThetaBraco += d_theta_braco * t_d;
-        this->gThetaBraco = std::min(this->gThetaBraco, std::min(45.0f, theta_braco_alvo));
+        this->gThetaBraco /= dist_centro;
+        this->gThetaBracoVert /= dist_centro;
     }
-    else
+}
+
+void Jogador::RodaBracoMouse(GLfloat d_theta_braco, GLfloat theta_alvo_horiz,
+                             GLfloat theta_alvo_vert, GLfloat t_d)
+{
+    GLfloat d_horiz = theta_alvo_horiz - this->gThetaBraco;
+    GLfloat d_vert = theta_alvo_vert - this->gThetaBracoVert;
+    GLfloat d_total = sqrt(d_horiz * d_horiz + d_vert * d_vert);
+
+    if (d_total == 0.0f) return;
+
+    GLfloat comp_horiz = d_horiz / d_total;
+    GLfloat comp_vert = d_vert / d_total;
+
+    this->gThetaBraco += d_theta_braco * t_d * comp_horiz;
+    if (theta_alvo_horiz > 0.0f)
     {
-        this->gThetaBraco -= d_theta_braco * t_d;
-        this->gThetaBraco = std::max(this->gThetaBraco, std::max(-45.0f, theta_braco_alvo));
+        if (this->gThetaBraco > theta_alvo_horiz) this->gThetaBraco = theta_alvo_horiz;
+    } else {
+        if (this->gThetaBraco < theta_alvo_horiz) this->gThetaBraco = theta_alvo_horiz;
+    }
+
+    this->gThetaBracoVert += d_theta_braco * t_d * comp_vert;
+    if (theta_alvo_vert > 0.0f)
+    {
+        if (this->gThetaBracoVert > theta_alvo_vert) this->gThetaBracoVert = theta_alvo_vert;
+    } else {
+        if (this->gThetaBracoVert < theta_alvo_vert) this->gThetaBracoVert = theta_alvo_vert;
     }
 }
 
@@ -218,27 +275,27 @@ GLfloat Jogador::RaioColisao()
     return this->raio * DIST_COLISAO;
 }
 
-GLfloat Jogador::XBaseBraco()
-{
-    return this->gX - this->raio * BRACO_DISTANCIA * sin(this->gTheta * PI / 180);
-}
+// GLfloat Jogador::XBaseBraco()
+// {
+//     return this->gX - this->raio * BRACO_DISTANCIA * sin(this->gTheta * PI / 180);
+// }
 
-GLfloat Jogador::YBaseBraco()
-{
-    return this->gY + this->raio * BRACO_DISTANCIA * cos(this->gTheta * PI / 180);
-}
+// GLfloat Jogador::YBaseBraco()
+// {
+//     return this->gY + this->raio * BRACO_DISTANCIA * cos(this->gTheta * PI / 180);
+// }
 
-GLfloat Jogador::XPontaBraco()
-{
-    return this->gX - this->raio * BRACO_DISTANCIA * sin(this->gTheta * PI / 180)
-    + this->raio * BRACO_COMPRIMENTO * cos((this->gTheta + this->gThetaBraco) * PI / 180);
-}
+// GLfloat Jogador::XPontaBraco()
+// {
+//     return this->gX - this->raio * BRACO_DISTANCIA * sin(this->gTheta * PI / 180)
+//     + this->raio * BRACO_COMPRIMENTO * cos((this->gTheta + this->gThetaBraco) * PI / 180);
+// }
 
-GLfloat Jogador::YPontaBraco()
-{
-    return this->gY + this->raio * BRACO_DISTANCIA * cos(this->gTheta * PI / 180)
-    + this->raio * BRACO_COMPRIMENTO * sin((this->gTheta + this->gThetaBraco) * PI / 180);
-}
+// GLfloat Jogador::YPontaBraco()
+// {
+//     return this->gY + this->raio * BRACO_DISTANCIA * cos(this->gTheta * PI / 180)
+//     + this->raio * BRACO_COMPRIMENTO * sin((this->gTheta + this->gThetaBraco) * PI / 180);
+// }
 
 GLfloat Jogador::Theta()
 {
@@ -247,12 +304,17 @@ GLfloat Jogador::Theta()
 
 GLfloat Jogador::ThetaBraco()
 {
-    return normalizaAnguloGraus(this->gTheta + this->gThetaBraco);
+    return normalizaAnguloGraus(this->gThetaBraco - this->gTheta);
+}
+
+GLfloat Jogador::ThetaBracoVert()
+{
+    return normalizaAnguloGraus(this->gThetaBracoVert);
 }
 
 GLfloat Jogador::Altura()
 {
-    return ALTURA_MEMBROS*3;
+    return raio * ALTURA;
 }
 
 int Jogador::Vidas()
@@ -293,28 +355,24 @@ int Jogador::colisaoTiro(std::vector<Tiro>& tiros, int id_jogador)
             continue;
         }
 
-        std::array<std::pair<GLfloat, GLfloat>, 4> pontos = tiro.Pontos();
-
-        // verifica se o tiro atingiu o jogador
-        // confere cada extremidade do retângulo
-        // essa é uma simplificação que assume
-        // que a bala sempre é menor do que qualquer jogador
-        // achei válido assumir isso dado o contexto do jogo
-        bool colisao = false;
-        for (int i = 1; i < 4; i++)
+        if (tiro.Z() > this->gZ + this->raio * ALTURA)
         {
-            GLfloat dist_x = pontos[i].first - this->gX;
-            GLfloat dist_y = pontos[i].second - this->gY;
-            GLfloat dist = sqrt(pow(dist_x, 2.0f) + pow(dist_y, 2.0f));
-
-            if (dist < this->raio)
-            {
-                colisao = true;
-                break;
-            }
+            it++;
+            continue;
         }
 
-        if (colisao)
+        if (tiro.Z() < this->gZ)
+        {
+            it++;
+            continue;
+        }
+
+        // verifica se o tiro atingiu o jogador
+        GLfloat dist_x = tiro.X() - this->gX;
+        GLfloat dist_y = tiro.Y() - this->gY;
+        GLfloat dist = sqrt(pow(dist_x, 2.0f) + pow(dist_y, 2.0f));
+
+        if (dist < this->raio)
         {
             it = tiros.erase(it);
             this->vidas--;
@@ -324,4 +382,28 @@ int Jogador::colisaoTiro(std::vector<Tiro>& tiros, int id_jogador)
     }
 
     return this->vidas;
+}
+
+GLfloat Jogador::XPontaBraco()
+{
+    GLfloat x = this->gX;
+    x += raio * BRACO_DISTANCIA * sin(-gTheta * M_PI / 180.0f);
+    x += raio * BRACO_COMPRIMENTO * cos((gTheta - gThetaBraco) * M_PI / 180.0f) * cos(-gThetaBracoVert * M_PI / 180.0f);
+    return x;
+}
+
+GLfloat Jogador::YPontaBraco()
+{
+    GLfloat y = this->gY;
+    y += raio * BRACO_DISTANCIA * cos(-gTheta * M_PI / 180.0f);
+    y += raio * BRACO_COMPRIMENTO * sin((gTheta - gThetaBraco) * M_PI / 180.0f) * cos(-gThetaBracoVert * M_PI / 180.0f);
+    return y;
+}
+
+GLfloat Jogador::ZPontaBraco()
+{
+    GLfloat z = this->gZ;
+    z += raio * (OMBRO_ALTURA - BRACO_ESPESSURA);
+    z += raio * BRACO_COMPRIMENTO * sin(-gThetaBracoVert * M_PI / 180.0f);
+    return z;
 }
