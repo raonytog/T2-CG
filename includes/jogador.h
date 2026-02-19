@@ -64,12 +64,12 @@ class Jogador {
 private:
     void DesenhaBraco(GLfloat raio, GLfloat R, GLfloat G, GLfloat B, GLfloat theta_braco, GLfloat theta_braco_vert);
     void DesenhaPerna(GLfloat raio, GLfloat animacao, GLfloat R, GLfloat G, GLfloat B);
-    void DesenhaCorpo(GLfloat R, GLfloat G, GLfloat B);
+    void DesenhaCorpo(GLfloat R, GLfloat G, GLfloat B, GLuint textura);
     void DesenhaCabeca(GLfloat raio, GLfloat R, GLfloat G, GLfloat B);
     void DesenhaJogador(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
                         GLfloat R, GLfloat G, GLfloat B,
                         GLfloat animacao, GLfloat theta,
-                        GLfloat theta_braco, GLfloat theta_braco_vert, int vidas);
+                        GLfloat theta_braco, GLfloat theta_braco_vert, int vidas, GLuint textura);
     // void DesenhaSuperior(GLfloat x, GLfloat y, GLfloat z, GLfloat raio,
     //                      GLfloat R, GLfloat G, GLfloat B,
     //                      GLfloat animacao, GLfloat theta, GLfloat theta_braco, int vidas);
@@ -96,9 +96,9 @@ public:
         this->pisando_oponente = 0;
     };
 
-    void Desenha()
+    void Desenha(GLuint textura)
     { 
-        DesenhaJogador(gX, gY, gZ, raio, gR, gG, gB, animacao, gTheta, gThetaBraco, gThetaBracoVert, vidas);
+        DesenhaJogador(gX, gY, gZ, raio, gR, gG, gB, animacao, gTheta, gThetaBraco, gThetaBracoVert, vidas, textura);
     };
     // void DesenhaParteSuperior()
     // { 

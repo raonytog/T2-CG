@@ -101,6 +101,7 @@ std::vector<Tiro> tiros;
 GLuint BACKGROUND_TEXTURE = 0;
 GLuint FLOOR_TEXTURE = 0;
 GLuint WALL_TEXTURE = 0;
+GLuint PLAYER_TEXTURE = 0;
 
 bool lighting_enabled = true;
 GLfloat camera_zoom = 5.0f;
@@ -244,9 +245,9 @@ void SetaLuzPersonagens(void)
     light_position_j_1[2] = j_1->Z() + j_1->Altura();
     light_position_j_1[3] = 1.0f;
 
-    light_difusa__j_1[0] = j_1->R();
-    light_difusa__j_1[1] = j_1->G();
-    light_difusa__j_1[2] = j_1->B();
+    light_difusa__j_1[0] = j_2->R();
+    light_difusa__j_1[1] = j_2->G();
+    light_difusa__j_1[2] = j_2->B();
     light_difusa__j_1[3] = 1.0f;
 
     // --- j_2 ---
@@ -255,9 +256,9 @@ void SetaLuzPersonagens(void)
     light_position_j_2[2] = j_2->Z() + j_2->Altura();
     light_position_j_2[3] = 1.0f;
 
-    light_difusa__j_2[0] = j_2->R();
-    light_difusa__j_2[1] = j_2->G();
-    light_difusa__j_2[2] = j_2->B();
+    light_difusa__j_2[0] = j_1->R();
+    light_difusa__j_2[1] = j_1->G();
+    light_difusa__j_2[2] = j_1->B();
     light_difusa__j_2[3] = 1.0f;
 
     // lanterna j_1
@@ -585,8 +586,8 @@ void renderPlayerScene(Jogador *p1, Jogador *p2)
 {
     ConfiguraCameraJogador(p1);
     arena->Desenha(WALL_TEXTURE, FLOOR_TEXTURE); 
-    p1->Desenha();
-    p2->Desenha();
+    p1->Desenha(PLAYER_TEXTURE);
+    p2->Desenha(PLAYER_TEXTURE);
     for (auto& tiro : tiros) { tiro.Desenha(); }
 }
 
@@ -630,8 +631,8 @@ void DesenhaVisaoPermanente(Jogador* p, int x_offset) {
     // Desenha a cena
     arena->Desenha(WALL_TEXTURE, FLOOR_TEXTURE);
 
-    j_1->Desenha();
-    j_2->Desenha();
+    j_1->Desenha(PLAYER_TEXTURE);
+    j_2->Desenha(PLAYER_TEXTURE);
     for (auto& tiro : tiros) { tiro.Desenha(); }
 }
 
@@ -1105,6 +1106,7 @@ void init()
 
     FLOOR_TEXTURE = CarregaTextura("textures/floor.jpg");
     WALL_TEXTURE = CarregaTextura("textures/wall.jpg");
+    PLAYER_TEXTURE = CarregaTextura("textures/jogador.jpg");
 }
 
 void inicializaObjetos()

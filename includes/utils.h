@@ -34,7 +34,7 @@ void DesenhaEsfera(GLfloat radius, GLfloat R, GLfloat G, GLfloat B, int detalhe)
 void DesenhaPrismaRetangular(GLfloat x_1, GLfloat x_2,
                              GLfloat y_1, GLfloat y_2,
                              GLfloat z_1, GLfloat z_2,
-                             GLfloat R, GLfloat G, GLfloat B);
+                             GLfloat R, GLfloat G, GLfloat B, GLuint textureID);
 
 GLuint CarregaTextura(const char* nomeArquivo);
 void debug();

@@ -12,7 +12,7 @@ void Jogador::DesenhaBraco(GLfloat raio, GLfloat R, GLfloat G, GLfloat B, GLfloa
         DesenhaPrismaRetangular(raio * BRACO_COMPRIMENTO, 0.0f,
                                 raio * BRACO_ESPESSURA, raio * -BRACO_ESPESSURA,
                                 raio * BRACO_ESPESSURA, raio * -BRACO_ESPESSURA,
-                                R, G, B);
+                                R, G, B, 0);
     glPopMatrix();
 }
 
@@ -36,13 +36,13 @@ void Jogador::DesenhaPerna(GLfloat raio, GLfloat animacao, GLfloat R, GLfloat G,
         glRotatef(180.0f + 45.0f * sin(this->animacao), 0.0f, 1.0f, 0.0f);
         DesenhaPrismaRetangular(raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
                                 raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
-                                0.0f, raio * SEGMENTO_PERNA_ALTURA, R, G, B);
+                                0.0f, raio * SEGMENTO_PERNA_ALTURA, R, G, B, 0);
         glPushMatrix();
             glTranslatef(0.0f, 0.0f, raio * SEGMENTO_PERNA_ALTURA);
             glRotatef(45.0f * pos_sin(this->animacao + M_PI), 0.0f, 1.0f, 0.0f);
             DesenhaPrismaRetangular(raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
                                     raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
-                                    0.0f, raio * SEGMENTO_PERNA_ALTURA, R, G, B);
+                                    0.0f, raio * SEGMENTO_PERNA_ALTURA, R, G, B, 0);
         glPopMatrix();
     glPopMatrix();
 
@@ -52,23 +52,23 @@ void Jogador::DesenhaPerna(GLfloat raio, GLfloat animacao, GLfloat R, GLfloat G,
         glRotatef(180.0f + 45.0f * sin(this->animacao + M_PI), 0.0f, 1.0f, 0.0f);
         DesenhaPrismaRetangular(raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
                                 raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
-                                0.0f, raio * SEGMENTO_PERNA_ALTURA, R, G, B);
+                                0.0f, raio * SEGMENTO_PERNA_ALTURA, R, G, B, 0);
         glPushMatrix();
             glTranslatef(0.0f, 0.0f, raio * SEGMENTO_PERNA_ALTURA);
             glRotatef(45.0f * pos_sin(this->animacao), 0.0f, 1.0f, 0.0f);
             DesenhaPrismaRetangular(raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
                                     raio * SEGMENTO_PERNA_ESPESSURA, raio * -SEGMENTO_PERNA_ESPESSURA,
-                                    0.0f, raio * SEGMENTO_PERNA_ALTURA, R, G, B);
+                                    0.0f, raio * SEGMENTO_PERNA_ALTURA, R, G, B, 0);
         glPopMatrix();
     glPopMatrix();
 }
 
-void Jogador::DesenhaCorpo(GLfloat R, GLfloat G, GLfloat B) {
+void Jogador::DesenhaCorpo(GLfloat R, GLfloat G, GLfloat B, GLuint textura) {
     glPushMatrix();
         glTranslatef(0.0f, 0.0f, raio * TRONCO_ALTURA);
         DesenhaPrismaRetangular(raio * OMBRO_LONGITUDINAL, raio * -OMBRO_LONGITUDINAL,
                                 raio * OMBRO_LATERAL, raio * -OMBRO_LATERAL,
-                                raio * (OMBRO_ALTURA - TRONCO_ALTURA), 0.0f, R, G, B);
+                                raio * (OMBRO_ALTURA - TRONCO_ALTURA), 0.0f, R, G, B, textura);
     glPopMatrix();
 }
 
@@ -83,7 +83,7 @@ void Jogador::DesenhaCabeca(GLfloat raio, GLfloat R, GLfloat G, GLfloat B) {
 void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat z, GLfloat unidade,
                             GLfloat R, GLfloat G, GLfloat B,
                             GLfloat animacao, GLfloat theta,
-                            GLfloat theta_braco, GLfloat theta_braco_vert, int vidas)
+                            GLfloat theta_braco, GLfloat theta_braco_vert, int vidas, GLuint textura)
 {
     glPushMatrix();
 
@@ -95,7 +95,7 @@ void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat z, GLfloat unidade,
 
         DesenhaPerna(raio, animacao, R, G, B);
         DesenhaBraco(raio, R, G, B, theta_braco, theta_braco_vert);
-        DesenhaCorpo(R, G, B);
+        DesenhaCorpo(R, G, B, textura);
         DesenhaCabeca(raio, R, G, B);
         // DesenhaElipse(raio * OMBRO_LONGITUDINAL, raio * OMBRO_LATERAL, R, G, B, DETALHE_OMBRO);
         // DesenhaCirc(raio, R, G, B, DETALHE_CABECA);

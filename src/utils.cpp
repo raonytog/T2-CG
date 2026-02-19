@@ -267,56 +267,89 @@ void DesenhaCoracao(GLfloat d_x, GLfloat d_y, GLfloat R, GLfloat G, GLfloat B, i
 }
 
 void DesenhaPrismaRetangular(GLfloat x_1, GLfloat x_2,
-                             GLfloat y_1, GLfloat y_2,
-                             GLfloat z_1, GLfloat z_2,
-                             GLfloat R, GLfloat G, GLfloat B)
+                                    GLfloat y_1, GLfloat y_2,
+                                    GLfloat z_1, GLfloat z_2,
+                                    GLfloat R, GLfloat G, GLfloat B, GLuint textureID)
 {
-    glColor3f(R, G, B);
+    if (textureID != 0) {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glColor3f(1.0f, 1.0f, 1.0f);
+    } else {
+        glDisable(GL_TEXTURE_2D);
+        glColor3f(R, G, B);
+    }
+    
     glBegin(GL_QUADS);
 
     // face superior (z = z_1) - normal para cima
     glNormal3f(0.0f, 0.0f, 1.0f);
+    if (textureID != 0) glTexCoord2f(0.0f, 0.0f);
     glVertex3f(x_1, y_1, z_1);
+    if (textureID != 0) glTexCoord2f(1.0f, 0.0f);
     glVertex3f(x_2, y_1, z_1);
+    if (textureID != 0) glTexCoord2f(1.0f, 1.0f);
     glVertex3f(x_2, y_2, z_1);
+    if (textureID != 0) glTexCoord2f(0.0f, 1.0f);
     glVertex3f(x_1, y_2, z_1);
 
     // face inferior (z = z_2) - normal para baixo
     glNormal3f(0.0f, 0.0f, -1.0f);
+    if (textureID != 0) glTexCoord2f(0.0f, 0.0f);
     glVertex3f(x_1, y_1, z_2);
+    if (textureID != 0) glTexCoord2f(1.0f, 0.0f);
     glVertex3f(x_2, y_1, z_2);
+    if (textureID != 0) glTexCoord2f(1.0f, 1.0f);
     glVertex3f(x_2, y_2, z_2);
+    if (textureID != 0) glTexCoord2f(0.0f, 1.0f);
     glVertex3f(x_1, y_2, z_2);
 
     // face traseira (y = y_1) - normal para trás
     glNormal3f(0.0f, 1.0f, 0.0f);
+    if (textureID != 0) glTexCoord2f(0.0f, 0.0f);
     glVertex3f(x_1, y_1, z_1);
+    if (textureID != 0) glTexCoord2f(1.0f, 0.0f);
     glVertex3f(x_2, y_1, z_1);
+    if (textureID != 0) glTexCoord2f(1.0f, 1.0f);
     glVertex3f(x_2, y_1, z_2);
+    if (textureID != 0) glTexCoord2f(0.0f, 1.0f);
     glVertex3f(x_1, y_1, z_2);
 
     // face frontal (y = y_2) - normal para frente
     glNormal3f(0.0f, -1.0f, 0.0f);
+    if (textureID != 0) glTexCoord2f(0.0f, 0.0f);
     glVertex3f(x_1, y_2, z_1);
+    if (textureID != 0) glTexCoord2f(1.0f, 0.0f);
     glVertex3f(x_2, y_2, z_1);
+    if (textureID != 0) glTexCoord2f(1.0f, 1.0f);
     glVertex3f(x_2, y_2, z_2);
+    if (textureID != 0) glTexCoord2f(0.0f, 1.0f);
     glVertex3f(x_1, y_2, z_2);
 
     // face direita (x = x_1) - normal para direita
     glNormal3f(1.0f, 0.0f, 0.0f);
+    if (textureID != 0) glTexCoord2f(0.0f, 0.0f);
     glVertex3f(x_1, y_1, z_1);
+    if (textureID != 0) glTexCoord2f(1.0f, 0.0f);
     glVertex3f(x_1, y_2, z_1);
+    if (textureID != 0) glTexCoord2f(1.0f, 1.0f);
     glVertex3f(x_1, y_2, z_2);
+    if (textureID != 0) glTexCoord2f(0.0f, 1.0f);
     glVertex3f(x_1, y_1, z_2);
 
     // face esquerda (x = x_2) - normal para esquerda
     glNormal3f(-1.0f, 0.0f, 0.0f);
+    if (textureID != 0) glTexCoord2f(0.0f, 0.0f);
     glVertex3f(x_2, y_1, z_1);
+    if (textureID != 0) glTexCoord2f(1.0f, 0.0f);
     glVertex3f(x_2, y_2, z_1);
+    if (textureID != 0) glTexCoord2f(1.0f, 1.0f);
     glVertex3f(x_2, y_2, z_2);
+    if (textureID != 0) glTexCoord2f(0.0f, 1.0f);
     glVertex3f(x_2, y_1, z_2);
 
     glEnd();
+    if (textureID != 0) glDisable(GL_TEXTURE_2D);
 }
 
 GLuint CarregaTextura(const char* nomeArquivo)
