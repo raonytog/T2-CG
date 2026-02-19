@@ -509,16 +509,34 @@ void ConfiguraCameraJogador(Jogador* p) {
             eyeY *= escala;
         }
 
-        // // colisao com obstáculos
-        // for (const auto& o : arena->getObstaculosVector())
-        // {
-        //     float dX = eyeX - o.x;
-        //     float dY = eyeY - o.y;
-        //     float distObst = sqrt(dX*dY + dX*dY);
-        //     float escala = (rArena - 1.0f) / distCentro;
-        //     eyeX *= escala;
-        //     eyeY *= escala;
-        // }
+        // colisao com obstáculos
+        for (const auto& o : arena->getObstaculosVector())
+        {
+            float dX = eyeX - o.x;
+            float dY = eyeY - o.y;
+            float distObst = sqrt(dX*dX + dY*dY);
+
+            if (distObst < o.raio)
+            {
+                // descobrir novas coordenadas de eyeX e eyeY fora do obstáculo
+                float pos_eye_x = x - eyeX;
+                float pos_eye_y = y - eyeY;
+
+                float eye_obst_x = eyeX - o.x;
+                float eye_obst_y = eyeY - o.y;
+
+                // equação quadrática
+                float a = pos_eye_x * pos_eye_x + pos_eye_y * pos_eye_y;
+                float b = 2 * (pos_eye_x * eye_obst_x + pos_eye_y * eye_obst_y);
+                float c = eye_obst_x * eye_obst_x + eye_obst_y * eye_obst_y - o.raio * o.raio;
+                float delta = b * b - 4 * a * c;
+
+                float t = (-b + sqrt(delta)) / (2.0f * a);
+
+                eyeX += t * pos_eye_x;
+                eyeY += t * pos_eye_y;
+            }
+        }
 
         // colisao com a supercicie da arena
         float alturaMinima = 2.0f;
