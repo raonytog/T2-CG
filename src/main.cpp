@@ -716,6 +716,7 @@ void reset()
     
     // Configura as posições e cores das luzes novamente
     SetaLuzPersonagens();
+    lighting_enabled = true;
 
     // reseta as cameras
     botaoDireitoPressionado = false;
