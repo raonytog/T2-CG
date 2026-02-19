@@ -79,6 +79,16 @@ const GLfloat luz_difusa[]   = { 0.7f, 0.7f, 0.7f, 1.0f };
 const GLfloat luz_especular[]= { 1.0f, 1.0f, 1.0f, 1.0f };
 const GLfloat luz_apagada[] =  { 0.0f, 0.0f, 0.0f, 0.8f };
 
+// Lanterna Jogador 1
+GLfloat light_position_l_1[4];
+GLfloat light_diffuse_l_1[] = {1.0f, 1.0f, 1.0f, 1.0f};
+GLfloat light_direction_l_1[3];
+
+// Lanterna Jogador 2
+GLfloat light_position_l_2[4];
+GLfloat light_diffuse_l_2[] = {1.0f, 1.0f, 1.0f, 1.0f};
+GLfloat light_direction_l_2[3];
+
 // Objetos
 Arena *arena = nullptr;
 
@@ -249,6 +259,33 @@ void SetaLuzPersonagens(void)
     light_difusa__j_2[1] = j_2->G();
     light_difusa__j_2[2] = j_2->B();
     light_difusa__j_2[3] = 1.0f;
+
+    // lanterna j_1
+    light_position_l_1[0] = j_1->XPontaBraco();
+    light_position_l_1[1] = j_1->YPontaBraco();
+    light_position_l_1[2] = j_1->ZPontaBraco();
+    light_position_l_1[3] = 1.0f; // luz pontual
+
+    float yaw   = -j_1->ThetaBraco() * M_PI / 180.0f;
+    float pitch = -j_1->ThetaBracoVert() * M_PI / 180.0f;
+
+    light_direction_l_1[0] = cos(pitch) * cos(yaw);
+    light_direction_l_1[1] = cos(pitch) * sin(yaw);
+    light_direction_l_1[2] = sin(pitch);
+
+    // lanterna j_2
+    light_position_l_2[0] = j_2->XPontaBraco();
+    light_position_l_2[1] = j_2->YPontaBraco();
+    light_position_l_2[2] = j_2->ZPontaBraco();
+    light_position_l_2[3] = 1.0f; // luz pontual
+
+    yaw   = -j_2->ThetaBraco() * M_PI / 180.0f;
+    pitch = -j_2->ThetaBracoVert() * M_PI / 180.0f;
+
+    light_direction_l_2[0] = cos(pitch) * cos(yaw);
+    light_direction_l_2[1] = cos(pitch) * sin(yaw);
+    light_direction_l_2[2] = sin(pitch);
+
 }
 
 struct Circulo
@@ -347,10 +384,68 @@ bool first_pov_cam()
     return gun_pov_cam() == 0 && third_pov_cam() == 0;
 }
 
+void ConfiguraLuzes() {
+    if (lighting_enabled) {
+        glEnable(GL_LIGHT0);
+        glEnable(GL_LIGHT1);
+        glEnable(GL_LIGHT2);
+        glDisable(GL_LIGHT3);
+        glDisable(GL_LIGHT4);
+
+        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+        // j_1 (vermelho)
+        glLightfv(GL_LIGHT1, GL_POSITION, light_position_j_1);
+        glLightfv(GL_LIGHT1, GL_DIFFUSE, light_difusa__j_1);
+        glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.75f);
+        glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.005f); 
+        glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.0f);
+
+        // j_2 (verde)
+        glLightfv(GL_LIGHT2, GL_POSITION, light_position_j_2);
+        glLightfv(GL_LIGHT2, GL_DIFFUSE, light_difusa__j_2);
+        glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 0.75f);
+        glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.005f); 
+        glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.0f);
+    }
+    
+    else {
+        glDisable(GL_LIGHT0);
+        glDisable(GL_LIGHT1);
+        glDisable(GL_LIGHT2);
+        glEnable(GL_LIGHT3);
+        glEnable(GL_LIGHT4);
+        
+        glEnable(GL_LIGHT3);
+
+        // lanterna j_1
+        glLightfv(GL_LIGHT3, GL_POSITION, light_position_l_1);
+        glLightfv(GL_LIGHT3, GL_DIFFUSE, light_diffuse_l_1);
+        glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, light_direction_l_1);
+        glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 45.0f);  
+        glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 30.0f);
+        glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 0.75f);
+        glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0.005f); 
+        glLightf(GL_LIGHT3, GL_QUADRATIC_ATTENUATION, 0.0f);
+
+        // lanterna j_2
+        glLightfv(GL_LIGHT4, GL_POSITION, light_position_l_2);
+        glLightfv(GL_LIGHT4, GL_DIFFUSE, light_diffuse_l_2);
+        glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, light_direction_l_2);
+        glLightf(GL_LIGHT4, GL_SPOT_CUTOFF, 45.0f);  
+        glLightf(GL_LIGHT4, GL_SPOT_EXPONENT, 30.0f);
+        glLightf(GL_LIGHT4, GL_CONSTANT_ATTENUATION, 0.75f);
+        glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, 0.005f); 
+        glLightf(GL_LIGHT4, GL_QUADRATIC_ATTENUATION, 0.0f);
+
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luz_apagada);
+    }
+}
+
 void ConfiguraCameraJogador(Jogador* p) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(fov, aspect_ratio, p->Raio(), 2000);
+    gluPerspective(fov, aspect_ratio, p->EyeR() * 0.5f, 2000);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
@@ -382,7 +477,7 @@ void ConfiguraCameraJogador(Jogador* p) {
     {
         eyeX = p->XPontaBraco();
         eyeY = p->YPontaBraco();
-        eyeZ = p->Altura(); 
+        eyeZ = p->ZPontaBraco(); 
 
         float theta_arma = p->ThetaBraco() * M_PI / 180.0f;
         lookX = eyeX + cos(theta_rad + theta_arma);
@@ -424,6 +519,9 @@ void ConfiguraCameraJogador(Jogador* p) {
     gluLookAt(eyeX, eyeY, eyeZ,
               lookX, lookY, lookZ,
               upX, upY, upZ);
+
+    SetaLuzPersonagens();
+    ConfiguraLuzes();
 }
 
 void DesenhaHUD()
@@ -454,41 +552,9 @@ void DesenhaHUD()
     glMatrixMode(GL_MODELVIEW);
 }
 
-void ConfiguraLuzes() {
-    if (lighting_enabled) {
-        glEnable(GL_LIGHT0);
-        glEnable(GL_LIGHT1);
-        glEnable(GL_LIGHT2);
-
-        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
-        // j_1 (vermelho)
-        glLightfv(GL_LIGHT1, GL_POSITION, light_position_j_1);
-        glLightfv(GL_LIGHT1, GL_DIFFUSE, light_difusa__j_1);
-        glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.5f);
-        glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.005f); 
-        glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.0f);
-
-        // j_2 (verde)
-        glLightfv(GL_LIGHT2, GL_POSITION, light_position_j_2);
-        glLightfv(GL_LIGHT2, GL_DIFFUSE, light_difusa__j_2);
-        glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 0.75f);
-        glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.005f); 
-        glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0.0f);
-    }
-    
-    else {
-        glDisable(GL_LIGHT0);
-        glDisable(GL_LIGHT1);
-        glDisable(GL_LIGHT2);
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luz_apagada);
-    }
-}
-
 void renderPlayerScene(Jogador *p1, Jogador *p2) 
 {
     ConfiguraCameraJogador(p1);
-    ConfiguraLuzes();
     arena->Desenha(WALL_TEXTURE, FLOOR_TEXTURE); 
     p1->Desenha();
     p2->Desenha();
@@ -501,7 +567,7 @@ void DesenhaVisaoPermanente(Jogador* p, int x_offset) {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(fov, (GLfloat)viewing_width / (GLfloat)height_permanent_view, p->Raio(), 2000);
+    gluPerspective(fov, (GLfloat)viewing_width / (GLfloat)height_permanent_view, p->EyeR() * 0.5f, 2000);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -529,8 +595,10 @@ void DesenhaVisaoPermanente(Jogador* p, int x_offset) {
               lookX, lookY, lookZ,
               0, 0, 1);
 
-    // Desenha a cena
+    SetaLuzPersonagens();
     ConfiguraLuzes();
+
+    // Desenha a cena
     arena->Desenha(WALL_TEXTURE, FLOOR_TEXTURE);
 
     j_1->Desenha();
@@ -548,7 +616,7 @@ void renderScene(void)
 
     glViewport(largura_inicial_j1, 0, splitted_width, viewing_height);
     renderPlayerScene(j_1, j_2);
-    DesenhaMiniMapa(j_2, j_1, LEFT_MINIMAP);
+    DesenhaMiniMapa(j_1, j_2, LEFT_MINIMAP);
     
     glViewport(splitted_width, 0, largura_inicial_j2, viewing_height);
     renderPlayerScene(j_2, j_1);
@@ -941,8 +1009,8 @@ void idle(void)
 
     j_1->RodaBracoMouse(OMEGA_BRACO, 45.0f * x_j_1, -45.0f * y_j_1, d_t);
 
-    if (key_status[(int) '4']) { if (!key_status[(int) '6']) j_2->RodaBraco(OMEGA_BRACO, d_t); }
-    else if (key_status[(int) '6']) { j_2->RodaBraco(-OMEGA_BRACO, d_t); }
+    if (key_status[(int) '4']) { if (!key_status[(int) '6']) j_2->RodaBraco(-OMEGA_BRACO, d_t); }
+    else if (key_status[(int) '6']) { j_2->RodaBraco(OMEGA_BRACO, d_t); }
 
     if (key_status[(int) '2']) { if (!key_status[(int) '8']) j_2->RodaBracoVert(OMEGA_BRACO, d_t); }
     else if (key_status[(int) '8']) { j_2->RodaBracoVert(-OMEGA_BRACO, d_t); }

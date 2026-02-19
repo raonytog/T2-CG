@@ -21,24 +21,24 @@
 
 #define ESCALA 1.0f
 
-#define SEGMENTO_PERNA_DISTANCIA 0.6f // distância do centro da base da perna ao eixo z, não entre uma perna e outra
+#define SEGMENTO_PERNA_DISTANCIA 0.8f // distância do centro da base da perna ao eixo z, não entre uma perna e outra
 #define SEGMENTO_PERNA_ALTURA 1.0f
 #define SEGMENTO_PERNA_ESPESSURA 0.2f // distância do centro do braço à ponta (raio do cilindro inscrito no prisma retangular)
 
-#define BRACO_DISTANCIA 0.6f // distância do centro da base do braço ao eixo z
+#define BRACO_DISTANCIA 0.8f // distância do centro da base do braço ao eixo z
 #define BRACO_COMPRIMENTO 2.0f
 #define BRACO_ESPESSURA 0.2f // distância do centro do braço à ponta (raio do cilindro inscrito no prisma retangular)
 
 #define OMBRO_ALTURA 4.0f
 #define OMBRO_LONGITUDINAL 0.2f // distância da ponta longitudinal do ombro ao eixo z
-#define OMBRO_LATERAL 0.8f // distância da ponta lateral do ombro ao eixo z
+#define OMBRO_LATERAL 1.0f // distância da ponta lateral do ombro ao eixo z
 
 #define TRONCO_ALTURA 2.0f
 
-#define CABECA_ALTURA 5.0f // centro da cabeça
-#define CABECA_RAIO 1.0f // raio da cabeça em relação ao raio limite do jogador
+#define CABECA_ALTURA 4.8f // centro da cabeça
+#define CABECA_RAIO 0.8f // raio da cabeça em relação ao raio limite do jogador
 
-#define ALTURA 6.0f
+#define ALTURA 5.6f
 
 #define DIST_COLISAO 1.0f
 
@@ -143,6 +143,9 @@ public:
     GLfloat XPontaBraco();
     GLfloat YPontaBraco();
     GLfloat ZPontaBraco();
+
+    GLfloat EyeR() { return this->raio * CABECA_RAIO; }
+    GLfloat EyeZ() { return this->raio * CABECA_ALTURA; }
 
     GLfloat Theta();
     GLfloat ThetaBraco();
