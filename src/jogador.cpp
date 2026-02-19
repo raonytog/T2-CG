@@ -407,3 +407,27 @@ GLfloat Jogador::ZPontaBraco()
     z += raio * BRACO_COMPRIMENTO * sin(-gThetaBracoVert * M_PI / 180.0f);
     return z;
 }
+
+GLfloat Jogador::XSobreArma()
+{
+    GLfloat x = this->gX;
+    x += raio * BRACO_DISTANCIA * sin(-gTheta * M_PI / 180.0f);
+    x += raio * (BRACO_COMPRIMENTO - OFFSET_ARMA_LONGITUDINAL) * cos((gTheta - gThetaBraco) * M_PI / 180.0f) * cos(-gThetaBracoVert * M_PI / 180.0f);
+    return x;
+}
+
+GLfloat Jogador::YSobreArma()
+{
+    GLfloat y = this->gY;
+    y += raio * (BRACO_DISTANCIA) * cos(-gTheta * M_PI / 180.0f);
+    y += raio * (BRACO_COMPRIMENTO - OFFSET_ARMA_LONGITUDINAL) * sin((gTheta - gThetaBraco) * M_PI / 180.0f) * cos(-gThetaBracoVert * M_PI / 180.0f);
+    return y;
+}
+
+GLfloat Jogador::ZSobreArma()
+{
+    GLfloat z = this->gZ;
+    z += raio * (OMBRO_ALTURA - BRACO_ESPESSURA + OFFSET_ARMA_VERTICAL);
+    z += raio * (BRACO_COMPRIMENTO - OFFSET_ARMA_LONGITUDINAL) * sin(-gThetaBracoVert * M_PI / 180.0f);
+    return z;
+}

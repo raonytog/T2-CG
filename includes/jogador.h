@@ -29,16 +29,19 @@
 #define BRACO_COMPRIMENTO 2.0f
 #define BRACO_ESPESSURA 0.2f // distância do centro do braço à ponta (raio do cilindro inscrito no prisma retangular)
 
-#define OMBRO_ALTURA 4.0f
+#define OFFSET_ARMA_LONGITUDINAL 0.8f
+#define OFFSET_ARMA_VERTICAL 0.6f
+
+#define OMBRO_ALTURA 4.4f
 #define OMBRO_LONGITUDINAL 0.2f // distância da ponta longitudinal do ombro ao eixo z
 #define OMBRO_LATERAL 1.0f // distância da ponta lateral do ombro ao eixo z
 
 #define TRONCO_ALTURA 2.0f
 
-#define CABECA_ALTURA 4.8f // centro da cabeça
+#define CABECA_ALTURA 5.2f // centro da cabeça
 #define CABECA_RAIO 0.8f // raio da cabeça em relação ao raio limite do jogador
 
-#define ALTURA 5.6f
+#define ALTURA 6.0f
 
 #define DIST_COLISAO 1.0f
 
@@ -143,6 +146,10 @@ public:
     GLfloat XPontaBraco();
     GLfloat YPontaBraco();
     GLfloat ZPontaBraco();
+
+    GLfloat XSobreArma();
+    GLfloat YSobreArma();
+    GLfloat ZSobreArma();
 
     GLfloat EyeR() { return this->raio * CABECA_RAIO; }
     GLfloat EyeZ() { return this->raio * CABECA_ALTURA; }

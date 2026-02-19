@@ -475,13 +475,13 @@ void ConfiguraCameraJogador(Jogador* p) {
 
     else if (gun_pov_cam()) 
     {
-        eyeX = p->XPontaBraco();
-        eyeY = p->YPontaBraco();
-        eyeZ = p->ZPontaBraco(); 
+        eyeX = p->XSobreArma();
+        eyeY = p->YSobreArma();
+        eyeZ = p->ZSobreArma();
 
         float theta_arma = p->ThetaBraco() * M_PI / 180.0f;
-        lookX = eyeX + cos(theta_rad + theta_arma);
-        lookY = eyeY + sin(theta_rad + theta_arma);
+        lookX = eyeX + cos(-theta_arma);
+        lookY = eyeY + sin(-theta_arma);
         lookZ = eyeZ;
     }
 
@@ -508,6 +508,17 @@ void ConfiguraCameraJogador(Jogador* p) {
             eyeX *= escala;
             eyeY *= escala;
         }
+
+        // // colisao com obstáculos
+        // for (const auto& o : arena->getObstaculosVector())
+        // {
+        //     float dX = eyeX - o.x;
+        //     float dY = eyeY - o.y;
+        //     float distObst = sqrt(dX*dY + dX*dY);
+        //     float escala = (rArena - 1.0f) / distCentro;
+        //     eyeX *= escala;
+        //     eyeY *= escala;
+        // }
 
         // colisao com a supercicie da arena
         float alturaMinima = 2.0f;
